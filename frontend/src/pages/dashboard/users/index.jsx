@@ -4,88 +4,100 @@ import React, { useState } from "react";
 import {
   useListUsersQuery,
   useDeleteUserMutation,
-} from "../../../../redux/features/userApi";
+} from "../../../redux/features/userApi";
 import {
-  FaEdit,
-  FaTrash,
-  FaPlus,
-  FaSearch,
-  FaArrowRight,
-} from "react-icons/fa";
+  Edit3,
+  Trash2,
+  UserPlus,
+  Search,
+  ArrowRight,
+  User,
+  ShieldCheck,
+  Phone,
+  MapPin,
+  Calendar,
+  Zap,
+} from "lucide-react"; // استفاده از لوسید برای هماهنگی با سبک فلاح
 import Link from "next/link";
-import DashboardLayout from "../../layout";
+import DashboardLayout from "../layout";
 import Swal from "sweetalert2";
 
-// کارت کاربران برای موبایل
+// کارت کاربران برای موبایل با استایل باشگاه فلاح
 const UserCard = ({ user, index, handleDelete }) => {
-  const statusColor =
-    user.status === "active"
-      ? "bg-green-100 text-green-700"
-      : "bg-gray-200 text-gray-600";
-  const statusText = user.status === "active" ? "فعال" : "غیرفعال";
+  const isActive = user.status === "active";
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition duration-300">
-      <div className="flex justify-between items-start mb-3 border-b pb-3 border-gray-100 dark:border-gray-700">
-        <div className="flex items-center gap-3">
-          {user.profileImage ? (
-            <img
-              src={user.profileImage}
-              alt={user.name}
-              className="w-12 h-12 object-cover rounded-full border-2 border-green-500"
-            />
-          ) : (
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500 rounded-full text-lg font-bold">
-              {user.name.charAt(0)}
-            </div>
-          )}
+    <div className="bg-[#1a1d23] p-5 rounded-2xl border border-gray-800 hover:border-yellow-400/50 transition-all duration-300 shadow-xl group">
+      <div className="flex justify-between items-start mb-4 border-b border-gray-800 pb-4">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            {user.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                className="w-14 h-14 object-cover rounded-xl border-2 border-yellow-400"
+              />
+            ) : (
+              <div className="w-14 h-14 flex items-center justify-center bg-gray-800 text-yellow-400 rounded-xl border-2 border-gray-700 text-xl font-black">
+                {user.name.charAt(0)}
+              </div>
+            )}
+            <div
+              className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#1a1d23] ${
+                isActive ? "bg-green-500" : "bg-gray-500"
+              }`}
+            ></div>
+          </div>
           <div>
-            <p className="font-bold text-gray-900 dark:text-white">
+            <p className="font-black text-white group-hover:text-yellow-400 transition-colors">
               {user.name}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              #{index + 1} - {user.role.name}
+            <p className="text-[11px] text-gray-500 uppercase tracking-wider">
+              ID: {user.employeeCode} | {user.role.name}
             </p>
           </div>
         </div>
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}
+          className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tighter ${
+            isActive ? "bg-yellow-400 text-black" : "bg-gray-700 text-gray-300"
+          }`}
         >
-          {statusText}
+          {isActive ? "Active" : "Inactive"}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-y-2 text-sm text-gray-700 dark:text-gray-300">
-        <p>
-          <span className="font-medium">کد سازمانی:</span> {user.employeeCode}
-        </p>
-        <p>
-          <span className="font-medium">شماره تماس:</span>{" "}
-          {user.contactNumber || "-"}
-        </p>
-        <p>
-          <span className="font-medium">آدرس:</span> {user.address || "-"}
-        </p>
-        <p>
-          <span className="font-medium">تاریخ تغییر رمز عبور:</span>{" "}
-          {user.passwordChangedAt
-            ? new Date(user.passwordChangedAt).toLocaleString()
-            : "-"}
-        </p>
+      <div className="space-y-3 text-[13px] text-gray-400">
+        <div className="flex items-center gap-2">
+          <Phone size={14} className="text-yellow-400" />
+          <span>{user.contactNumber || "بدون شماره"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin size={14} className="text-yellow-400" />
+          <span className="truncate">{user.address || "بدون آدرس"}</span>
+        </div>
+        <div className="flex items-center gap-2 border-t border-gray-800/50 pt-2 mt-2">
+          <Calendar size={14} className="text-gray-500" />
+          <span className="text-[11px]">
+            آخرین تغییر رمز:{" "}
+            {user.passwordChangedAt
+              ? new Date(user.passwordChangedAt).toLocaleDateString("fa-IR")
+              : "---"}
+          </span>
+        </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex justify-end gap-2 mt-5">
         <Link
-          href={`/dashboard/main/users/${user._id}/edit`}
-          className="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-xs transition-all font-medium"
+          href={`/dashboard/users/${user._id}/edit`}
+          className="flex-1 flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-lg text-xs transition-all font-bold"
         >
-          <FaEdit /> ویرایش
+          <Edit3 size={14} /> ویرایش
         </Link>
         <button
           onClick={() => handleDelete(user._id)}
-          className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-all font-medium"
+          className="flex-1 flex items-center justify-center gap-2 bg-red-900/20 hover:bg-red-600 text-red-500 hover:text-white p-2 rounded-lg text-xs transition-all font-bold border border-red-900/50"
         >
-          <FaTrash /> حذف
+          <Trash2 size={14} /> حذف
         </button>
       </div>
     </div>
@@ -99,26 +111,34 @@ export default function UsersPage() {
 
   const users = Array.isArray(data) ? data : [];
 
-  // تابع حذف کاربر با SweetAlert2
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "آیا از حذف این کاربر مطمئن هستید؟",
-      text: "این عملیات غیرقابل بازگشت است!",
+      title: "آیا مطمئن هستید؟",
+      text: "عضویت این کاربر لغو و اطلاعات حذف خواهد شد!",
       icon: "warning",
+      background: "#1a1d23",
+      color: "#fff",
       showCancelButton: true,
-      confirmButtonText: "بله، حذف شود",
-      cancelButtonText: "خیر",
+      confirmButtonColor: "#facc15",
+      cancelButtonColor: "#374151",
+      confirmButtonText: "بله، حذف کن",
+      cancelButtonText: "انصراف",
       reverseButtons: true,
     });
 
     if (result.isConfirmed) {
       try {
         await deleteUser(id).unwrap();
-        Swal.fire("حذف شد!", "کاربر با موفقیت حذف شد.", "success");
+        Swal.fire({
+          title: "حذف شد!",
+          icon: "success",
+          background: "#1a1d23",
+          color: "#fff",
+          confirmButtonColor: "#facc15",
+        });
         refetch();
       } catch (err) {
-        console.error(err);
-        Swal.fire("خطا!", "در حذف کاربر مشکلی پیش آمد.", "error");
+        Swal.fire("خطا!", "مشکلی در حذف رخ داد.", "error");
       }
     }
   };
@@ -126,136 +146,151 @@ export default function UsersPage() {
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.contactNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.address?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading)
     return (
       <DashboardLayout>
-        <div className="flex justify-center py-10 text-cyan-600  font-semibold text-lg animate-pulse">
-          در حال بارگذاری کاربران... لطفاً صبر کنید.
-        </div>
-      </DashboardLayout>
-    );
-
-  if (isError)
-    return (
-      <DashboardLayout>
-        <div className="flex justify-center py-10 text-red-600 font-semibold text-lg">
-          ❌ خطا در دریافت اطلاعات کاربران. لطفاً اتصال خود را بررسی کنید.
+        <div className="flex flex-col items-center justify-center py-20 text-yellow-400 font-black animate-pulse">
+          <Zap size={48} className="mb-4 animate-bounce" />
+          در حال فراخوانی لیست ورزشکاران...
         </div>
       </DashboardLayout>
     );
 
   return (
     <DashboardLayout>
-      <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-cyan-950 rounded-4xl">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b dark:border-gray-700">
-          <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-8 min-h-screen bg-[#0f1115] rounded-[2.5rem] border border-gray-800 shadow-2xl">
+        {/* Header - Falah Gym Style */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+          <div className="flex items-center gap-4">
             <Link
-              href="/dashboard/main"
-              className="p-2 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="بازگشت"
+              href="/dashboard"
+              className="p-3 bg-gray-800 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all rounded-xl shadow-lg"
             >
-              <FaArrowRight size={20} />
+              <ArrowRight size={24} />
             </Link>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-white">
-              مدیریت کاربران
-            </h2>
+            <div>
+              <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">
+                مدیریت <span className="text-yellow-400">ورزشکاران</span>
+              </h2>
+              <p className="text-gray-500 text-xs mt-1 uppercase tracking-widest">
+                User Management System
+              </p>
+            </div>
           </div>
+
           <Link
-            href="/dashboard/main/users/create"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl text-base font-medium transition-all shadow-md hover:shadow-lg"
+            href="/dashboard/users/create"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-2xl text-sm font-black transition-all shadow-[0_10px_20px_rgba(250,204,21,0.2)] active:scale-95"
           >
-            <FaPlus /> افزودن کاربر جدید
+            <UserPlus size={18} /> افزودن ورزشکار جدید
           </Link>
         </div>
 
-        {/* Search */}
-        <div className="mb-6 flex items-center relative">
+        {/* Search Bar - Falah Gym Style */}
+        <div className="mb-8 relative group">
           <input
             type="text"
-            placeholder="جستجو بر اساس نام، کد سازمانی، شماره تماس یا آدرس..."
+            placeholder="جستجو بر اساس نام، کد عضویت یا مشخصات..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 transition shadow-sm"
+            className="w-full bg-[#1a1d23] border border-gray-800 text-white rounded-2xl p-4 pr-12 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/10 transition-all shadow-inner"
           />
-          <FaSearch className="absolute right-3 text-gray-400" />
+          <Search
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-yellow-400 transition-colors"
+            size={20}
+          />
         </div>
 
-        {/* جدول دسکتاپ */}
-        <div className="hidden md:block overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-          <table className="min-w-full text-sm text-gray-800 dark:text-gray-200">
-            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
-              <tr className="text-right text-xs uppercase tracking-wider">
-                <th className="py-3 px-4 w-10">#</th>
-                <th className="py-3 px-4">نام</th>
-                <th className="py-3 px-4">کد سازمانی</th>
-                <th className="py-3 px-4">شماره تماس</th>
-                <th className="py-3 px-4">آدرس</th>
-                <th className="py-3 px-4">نقش</th>
-                <th className="py-3 px-4">وضعیت</th>
-                <th className="py-3 px-4">تاریخ آخرین تغییر رمز عبور</th>
-                <th className="py-3 px-4 text-center">عملیات</th>
+        {/* Desktop Table - Falah Gym Style */}
+        <div className="hidden lg:block overflow-hidden bg-[#1a1d23] rounded-3xl border border-gray-800 shadow-2xl">
+          <table className="w-full text-right">
+            <thead>
+              <tr className="bg-gray-800/50 text-gray-400 text-[11px] uppercase tracking-[0.2em] border-b border-gray-700">
+                <th className="py-5 px-6 font-black">رتبه</th>
+                <th className="py-5 px-6 font-black">ورزشکار</th>
+                <th className="py-5 px-6 font-black">کد عضویت</th>
+                <th className="py-5 px-6 font-black">تماس</th>
+                <th className="py-5 px-6 font-black">نقش</th>
+                <th className="py-5 px-6 font-black text-center">وضعیت</th>
+                <th className="py-5 px-6 font-black text-center">عملیات</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-800">
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="9"
-                    className="text-center py-10 text-gray-400 dark:text-gray-300 font-medium text-lg"
+                    colSpan="7"
+                    className="text-center py-20 text-gray-600 font-bold italic text-xl"
                   >
-                    🔍 هیچ کاربری یافت نشد.
+                    ⚠️ هیچ ورزشکاری در این لیست یافت نشد
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((user, index) => (
                   <tr
                     key={user._id}
-                    className="text-right border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    className="hover:bg-yellow-400/5 transition-colors group"
                   >
-                    <td className="py-3 px-4 font-mono">{index + 1}</td>
-                    <td className="py-3 px-4 flex items-center gap-2">
-                      {user.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={user.name}
-                          className="w-10 h-10 object-cover rounded-full shadow-md"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 font-bold text-sm">
-                          {user.name.charAt(0)}
-                        </div>
-                      )}
-                      {user.name}
+                    <td className="py-4 px-6 font-mono text-gray-500 text-xs">
+                      {(index + 1).toString().padStart(2, "0")}
                     </td>
-                    <td className="py-3 px-4">{user.employeeCode}</td>
-                    <td className="py-3 px-4">{user.contactNumber || "-"}</td>
-                    <td className="py-3 px-4">{user.address || "-"}</td>
-                    <td className="py-3 px-4">{user.role.name}</td>
-                    <td className="py-3 px-4">{user.status}</td>
-                    <td className="py-3 px-4">
-                      {user.passwordChangedAt
-                        ? new Date(user.passwordChangedAt).toLocaleString()
-                        : "-"}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        {user.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            className="w-10 h-10 rounded-lg object-cover border border-gray-700"
+                            alt=""
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-yellow-400 font-bold text-xs border border-gray-700">
+                            {user.name.charAt(0)}
+                          </div>
+                        )}
+                        <span className="font-bold text-gray-200 group-hover:text-white">
+                          {user.name}
+                        </span>
+                      </div>
                     </td>
-                    <td className="py-3 px-4 flex justify-center gap-2">
-                      <Link
-                        href={`/dashboard/main/users/${user._id}/edit`}
-                        className="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-xs transition-all"
-                      >
-                        <FaEdit /> ویرایش
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-all"
-                      >
-                        <FaTrash /> حذف
-                      </button>
+                    <td className="py-4 px-6 text-gray-400 font-mono text-[12px]">
+                      {user.employeeCode}
+                    </td>
+                    <td className="py-4 px-6 text-gray-400 text-[12px]">
+                      {user.contactNumber || "---"}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="flex items-center gap-1.5 text-xs text-gray-300 bg-gray-800 px-2 py-1 rounded-md w-fit">
+                        <ShieldCheck size={12} className="text-blue-400" />{" "}
+                        {user.role.name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      <span
+                        className={`inline-block w-2.5 h-2.5 rounded-full ${
+                          user.status === "active"
+                            ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+                            : "bg-gray-600"
+                        }`}
+                      ></span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex justify-center gap-2">
+                        <Link
+                          href={`/dashboard/users/${user._id}/edit`}
+                          className="p-2 bg-gray-800 text-gray-400 hover:text-yellow-400 hover:bg-gray-700 rounded-lg transition-all"
+                        >
+                          <Edit3 size={16} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="p-2 bg-gray-800 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -264,8 +299,8 @@ export default function UsersPage() {
           </table>
         </div>
 
-        {/* کارت موبایل */}
-        <div className="md:hidden grid grid-cols-1 gap-4">
+        {/* کارت موبایل - Falah Gym Style */}
+        <div className="lg:hidden grid grid-cols-1 gap-4">
           {filteredUsers.map((user, index) => (
             <UserCard
               key={user._id}

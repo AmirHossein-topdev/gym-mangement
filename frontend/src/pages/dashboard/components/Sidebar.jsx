@@ -1,38 +1,65 @@
 "use client";
-
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import {
-  FaBoxOpen,
-  FaChevronDown,
-  FaChevronUp,
-  FaHome,
-  FaShoppingBag,
-  FaStore,
-  FaTimes,
-  FaUsers,
-} from "react-icons/fa";
+  LayoutDashboard,
+  Users,
+  UserRound,
+  Dumbbell,
+  Coffee,
+  CalendarDays,
+  CreditCard,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Zap,
+} from "lucide-react"; // استفاده از لوسید آیکون
 
 const menuItems = [
-  { label: "داشبورد", icon: <FaHome />, href: "/dashboard" },
+  { label: "داشبورد", icon: <LayoutDashboard size={20} />, href: "/dashboard" },
   {
-    label: "مالکان",
-    icon: <FaShoppingBag />,
-    href: "/dashboard/main/owners",
+    label: "مدیریت اعضا",
+    icon: <Users size={20} />,
+    href: "/dashboard/members",
   },
   {
-    label: "مستغلات سازمانی",
-    icon: <FaBoxOpen />,
-    href: "/dashboard/main/properties",
+    label: "مربیان و پرسنل",
+    icon: <UserRound size={20} />,
+    href: "/dashboard/trainers",
   },
   {
-    label: "کاربران",
-    icon: <FaUsers />,
-    href: "/dashboard/main/users",
+    label: "حضور و غیاب",
+    icon: <CalendarDays size={20} />,
+    href: "/dashboard/presence",
+  },
+  {
+    label: "بوفه و رستوران",
+    icon: <Coffee size={20} />,
+    href: "/dashboard/cafe",
+    subMenu: [
+      { label: "لیست منو", href: "/dashboard/cafe/menu" },
+      { label: "فروش روزانه", href: "/dashboard/cafe/sales" },
+    ],
+  },
+  {
+    label: "تجهیزات باشگاه",
+    icon: <Dumbbell size={20} />,
+    href: "/dashboard/equipment",
+  },
+  {
+    label: "امور مالی",
+    icon: <CreditCard size={20} />,
+    href: "/dashboard/finance",
+  },
+  {
+    label: "تنظیمات سیستمی",
+    icon: <Settings size={20} />,
+    href: "/dashboard/settings",
   },
 ];
-git branch real_work 1e64a91
+
 function MenuItem({ item, pathname, onClose, level = 0 }) {
   const [open, setOpen] = useState(false);
 
@@ -52,38 +79,32 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
     : false;
 
   const paddingRight = 16 + level * 12;
-  const fontSize = `${Math.max(14 - level * 2, 10)}px`;
 
   if (item.subMenu) {
     return (
-      <li>
+      <li className="list-none">
         <div
-          className={`flex items-center justify-between rounded-lg p-2 hover:bg-gray-300 ${
-            isActive ? "bg-gray-300 text-green-800" : "text-white"
+          className={`flex items-center justify-between rounded-xl p-3 mb-1 transition-all duration-200 cursor-pointer ${
+            isActive
+              ? "bg-yellow-400/10 text-yellow-400"
+              : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
           }`}
           style={{ paddingRight }}
         >
-          <Link
-            href={item.href}
+          <div
             className="flex items-center gap-3 flex-1"
-            onClick={onClose}
-          >
-            {item.icon}
-            <span className="text-sm font-medium" style={{ fontSize }}>
-              {item.label}
-            </span>
-          </Link>
-          <button
-            type="button"
-            className="text-gray-900 hover:text-green-400 p-1"
             onClick={() => setOpen(!open)}
           >
-            {open ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+            {item.icon}
+            <span className="text-[14px] font-medium">{item.label}</span>
+          </div>
+          <button onClick={() => setOpen(!open)}>
+            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
         </div>
 
         {open && (
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-1 space-y-1 overflow-hidden transition-all">
             {item.subMenu.map((sub, i) => (
               <MenuItem
                 key={i}
@@ -100,19 +121,19 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
   }
 
   return (
-    <li>
+    <li className="list-none">
       <Link
         href={item.href}
-        className={`flex items-center gap-3 rounded-lg p-2 hover:bg-gray-800 hover:text-green-400 ${
-          isActive ? "bg-gray-800 text-green-400 bg-cyan200" : "text-white"
+        className={`flex items-center gap-3 rounded-xl p-3 mb-1 transition-all duration-200 ${
+          isActive
+            ? "bg-yellow-400 text-black font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)]"
+            : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
         }`}
         style={{ paddingRight }}
         onClick={onClose}
       >
         {item.icon}
-        <span className="text-sm font-medium" style={{ fontSize }}>
-          {item.label}
-        </span>
+        <span className="text-[14px]">{item.label}</span>
       </Link>
     </li>
   );
@@ -129,9 +150,14 @@ export default function Sidebar({ isMobileOpen, onClose }) {
     const toggleSidebar = () => {
       if (window.innerWidth >= 1024) {
         sidebar.classList.toggle("lg:w-20");
-        sidebar.classList.toggle("lg:w-56");
-        mainContent.classList.toggle("lg:mr-20");
-        mainContent.classList.toggle("lg:mr-56");
+        sidebar.classList.toggle("lg:w-64");
+        if (mainContent) {
+          mainContent.classList.toggle("lg:mr-20");
+          mainContent.classList.toggle("lg:mr-64");
+        }
+        // پنهان کردن متن‌ها در حالت جمع شده
+        const texts = document.querySelectorAll(".sidebar-text");
+        texts.forEach((t) => t.classList.toggle("hidden"));
       }
     };
 
@@ -142,28 +168,74 @@ export default function Sidebar({ isMobileOpen, onClose }) {
   return (
     <div
       id="sidebar"
-      className={`fixed top-0 right-0 h-full w-56 z-50 bg-green-950 text-white flex-col transition-transform duration-300 transform ${
+      className={`fixed top-0 right-0 h-full w-56 z-[60] bg-[#0f1115] border-l border-gray-800 text-white flex flex-col transition-all duration-300 transform ${
         isMobileOpen ? "translate-x-0" : "translate-x-full"
       } lg:translate-x-0 lg:flex`}
+      dir="rtl"
     >
-      <div className="flex items-center justify-between p-4">
+      {/* بخش لوگو */}
+      <div className="flex items-center justify-between p-6 mb-4">
         <div
           id="sidebarLogo"
-          className="flex items-center gap-2 cursor-pointer text-green-900 font-bold text-xl"
+          className="flex items-center gap-3 cursor-pointer group"
         >
-          <FaStore />
-          <span className="sidebar-title">پنل مدیریت</span>
+          <div className="bg-yellow-400 p-2 rounded-lg group-hover:rotate-12 transition-transform">
+            <Zap size={20} className="text-black" />
+          </div>
+          <span className="sidebar-text font-black italic text-xl tracking-tighter">
+            IRON <span className="text-yellow-400">GYM</span>
+          </span>
         </div>
-        <button onClick={onClose} className="lg:hidden text-2xl text-white">
-          <FaTimes />
+        <button
+          onClick={onClose}
+          className="lg:hidden text-gray-400 hover:text-white"
+        >
+          <X size={24} />
         </button>
       </div>
 
-      <ul className="mt-4 space-y-2 px-2 text-white">
-        {menuItems.map((item, i) => (
-          <MenuItem key={i} item={item} pathname={pathname} onClose={onClose} />
-        ))}
-      </ul>
+      {/* منوها */}
+      <nav className="flex-1 overflow-y-auto px-4 custom-scrollbar">
+        <p className="sidebar-text text-[10px] uppercase tracking-widest text-gray-500 mb-4 mr-2">
+          منوی اصلی
+        </p>
+        <ul className="space-y-1">
+          {menuItems.map((item, i) => (
+            <MenuItem
+              key={i}
+              item={item}
+              pathname={pathname}
+              onClose={onClose}
+            />
+          ))}
+        </ul>
+      </nav>
+
+      {/* فوتر سایدبار (پروفایل کوتاه) */}
+      <div className="p-4 border-t border-gray-800">
+        <div className="flex items-center gap-3 p-2 bg-gray-900/50 rounded-2xl">
+          <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center text-black font-bold">
+            AD
+          </div>
+          <div className="sidebar-text">
+            <p className="text-sm font-bold">مدیر سیستم</p>
+            <p className="text-[10px] text-gray-500">خوش آمدید</p>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #333;
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 }

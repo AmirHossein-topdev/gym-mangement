@@ -1,124 +1,151 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { BsExclamationTriangle } from "react-icons/bs";
+import {
+  ShieldAlert,
+  Dumbbell,
+  History,
+  LockKeyhole,
+  UserRoundCheck,
+  Instagram,
+  Send,
+  Phone,
+} from "lucide-react"; // استفاده از لوسید آیکون
 import AdminLoginForm from "../forms/AdminLoginForm";
 
-const tips = [
-  "از <span class='font-bold'>مرورگر های مطمئن و بروز</span> مانند گوگل کروم و فایرفاکس استفاده کنید.",
-  "<span class='font-bold'>رمز عبور</span> خود را در فواصل زمانی کوتاه تغییر دهید.",
-  "پس از انجام و اتمام کار، حتما از سیستم <span class='font-black'>خارج</span> شوید.",
-  "هرگز <span class='font-bold'>نام کاربری و گذرواژه</span> خود را در اختیار دیگران قرار ندهید.",
+const fitnessTips = [
+  {
+    icon: <Dumbbell className="w-5 h-5" />,
+    text: "برای حفظ سلامت، لطفاً پس از تمرین <span class='text-yellow-400 font-bold'>وزنه‌ها را در جای خود</span> قرار دهید.",
+  },
+  {
+    icon: <LockKeyhole className="w-5 h-5" />,
+    text: "جهت امنیت حساب، <span class='text-yellow-400 font-bold'>رمز عبور</span> خود را در اختیار سایر ورزشکاران قرار ندهید.",
+  },
+  {
+    icon: <UserRoundCheck className="w-5 h-5" />,
+    text: "پس از اتمام کار با سیستم رزرو، حتماً از حساب خود <span class='text-yellow-400 font-bold'>خارج شوید</span>.",
+  },
+  {
+    icon: <History className="w-5 h-5" />,
+    text: "تاریخ اعتبار <span class='text-yellow-400 font-bold'>بیمه ورزشی</span> خود را از طریق پنل چک کنید.",
+  },
 ];
 
 export default function AdminLoginArea() {
   return (
-    <section className="fixed inset-0 bg-gray-50 flex flex-col lg:flex-row overflow-hidden">
-      {/* right */}
-      <section className="w-full lg:w-3/4 p-6 lg:p-10 flex flex-col justify-between h-screen">
-        {/* لوگو + warning + tips */}
-        <div className="">
-          {/* logo */}
-          <img
-            src="/assets/img/logo.png"
-            alt=""
-            className="h-14 object-fill mx-auto md:ms-0 mb-[2vh]"
-          />
+    <section
+      className="fixed inset-0 bg-[#0f1115] flex flex-col lg:flex-row overflow-hidden font-sans"
+      dir="rtl"
+    >
+      {/* بخش راست: فرم و محتوا */}
+      <section className="w-full lg:w-[45%] p-6 lg:p-12 flex flex-col justify-between h-screen z-10 bg-[#0f1115] shadow-2xl">
+        <div>
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-10 justify-center lg:justify-start">
+            <div className="bg-yellow-400 p-2 rounded-xl">
+              <Dumbbell className="w-8 h-8 text-black" />
+            </div>
+            <h1 className="text-white text-2xl font-black italic tracking-tighter">
+              IRON <span className="text-yellow-400">GYM</span>
+            </h1>
+          </div>
 
-          {/* warning */}
-          <div className="mt-[15vh] bg-amber-200 border-l-4 border-amber-500 text-amber-900 p-4 rounded-lg gap-3 w-full lg:w-3/5 hidden md:flex">
-            <p className="text-[14px] leading-relaxed">
-              <span className="inline-flex items-center font-light text-amber-700">
-                <BsExclamationTriangle className="mr-1 ml-1 h-5 w-5" />
-              </span>
-              کاربر گرامی، به منظور ارتقاء سطح امنیت حساب کاربری توصیه میگردد،
-              مولفه امنیتی ورود دو مرحله ای از طریق پیامک را در سیستم
-              <span className="font-bold text-blue-700"> پروفایل کاربری </span>
-              از منو فعالسازی ورود دو مرحله ای فعال نمایید.
+          {/* Warning Message */}
+          <div className="mt-8 bg-yellow-400/10 border-r-4 border-yellow-400 text-gray-200 p-4 rounded-xl flex items-start gap-3 w-full animate-pulse-slow">
+            <ShieldAlert className="text-yellow-400 shrink-0 w-6 h-6" />
+            <p className="text-[13px] leading-relaxed">
+              ورزشکار گرامی، جهت جلوگیری از سوءاستفاده از{" "}
+              <span className="font-bold text-yellow-400">کمد اختصاصی</span> و
+              اعتبار اشتراک، ورود دو مرحله‌ای را فعال کنید.
             </p>
           </div>
 
-          {/* tips */}
-          <ul className="space-y-[1.5vh] mt-[8vh] hidden md:block">
-            {tips.map((item, i) => (
-              <li key={i} className="flex items-center gap-3">
-                <span className="w-6 h-6 flex items-center text-[15px] justify-center rounded-full bg-blue-900 text-white font-bold">
-                  {i + 1}
-                </span>
+          {/* Fitness Tips */}
+          <ul className="space-y-6 mt-12 hidden md:block">
+            {fitnessTips.map((item, i) => (
+              <li key={i} className="flex items-start gap-4 group">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 text-yellow-400 group-hover:bg-yellow-400 group-hover:text-black transition-all duration-300">
+                  {item.icon}
+                </div>
                 <h3
-                  className="text-black text-[15px]"
-                  dangerouslySetInnerHTML={{ __html: item }}
+                  className="text-gray-400 text-[14px] mt-2 group-hover:text-white transition-colors"
+                  dangerouslySetInnerHTML={{ __html: item.text }}
                 />
               </li>
             ))}
           </ul>
         </div>
-        {/* form */}
-        <div className="md:fixed inset-0 flex items-center justify-center z-50 p-4 mt-10 mb-5">
-          <AdminLoginForm />
-        </div>
-        {/* social medias + copyright */}
-        <div className="">
-          <div className="mx-auto md:ms-0 mt-[2vh] lg:mt-[4vh] bg-blue-800 rounded-2xl flex flex-wrap justify-evenly items-center w-fit gap-4 lg:gap-5 py-1 px-5">
+
+        {/* Social Medias & Footer */}
+        <div className="mt-auto">
+          <div className="flex items-center gap-4 mb-6 justify-center lg:justify-start">
             <Link
-              href="https://t.me/yourUsername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-blue-500"
+              href="#"
+              className="p-3 bg-gray-800 rounded-full text-gray-400 hover:bg-yellow-400 hover:text-black transition-all"
             >
-              <img src="/assets/img/logo/telegram.png" alt="" className="h-8" />
+              <Instagram size={20} />
             </Link>
             <Link
-              href="https://wa.me/yourNumber"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-green-500"
+              href="#"
+              className="p-3 bg-gray-800 rounded-full text-gray-400 hover:bg-blue-500 hover:text-white transition-all"
             >
-              <img src="/assets/img/logo/whatsapp.png" alt="" className="h-8" />
+              <Send size={20} />
             </Link>
             <Link
-              href="https://instagram.com/yourUsername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-purple-500"
+              href="#"
+              className="p-3 bg-gray-800 rounded-full text-gray-400 hover:bg-green-500 hover:text-white transition-all"
             >
-              <img
-                src="/assets/img/logo/instagram.png"
-                alt=""
-                className="h-9"
-              />
-            </Link>
-            <Link href="https://bale.ai/">
-              <img
-                src="/assets/img/logo/bale-color.png"
-                alt="bale"
-                className="h-6"
-              />
-            </Link>
-            <Link href="https://web.eaita.com/">
-              <img
-                src="/assets/img/logo/eitaa-icon-colorful.png"
-                alt="bale"
-                className="h-6"
-              />
+              <Phone size={20} />
             </Link>
           </div>
 
-          <p className="text-black mt-[1vh] lg:mt-[2vh] text-base text-center md:text-right lg:text-[15px]">
-            پورتال رسمی سازمان تامین اجتماعی: www.tamin.ir | مرکز تماس
-            شبانه‌روزی: 1420 | شبکه‌های اجتماعی: tamin_media@
+          <p className="text-gray-500 text-xs text-center lg:text-right border-t border-gray-800 pt-4 leading-loose">
+            پورتال مدیریت هوشمند باشگاه بدنسازی | پشتیبانی فنی: ۰۲۱-۱۲۳۴۵۶{" "}
+            <br />
+            تمام حقوق برای مجموعه ورزشی محفوظ است.
           </p>
         </div>
       </section>
 
-      {/* left */}
-      <section className="w-full lg:w-4/5 hidden md:block">
+      {/* بخش فرم (شناور در وسط برای موبایل و دسکتاپ) */}
+      <div className="absolute inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-md">
+          <AdminLoginForm />
+        </div>
+      </div>
+
+      {/* بخش چپ: تصویر پس‌زمینه حرفه‌ای */}
+      <section className="hidden lg:block lg:w-[55%] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0f1115] via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 bg-yellow-400/10 mix-blend-overlay z-10" />
         <img
-          src="/assets/img/taminLoginPic1.png"
-          alt=""
-          className="h-screen w-full object-cover"
+          src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
+          alt="Gym Background"
+          className="h-screen w-full object-cover scale-105 hover:scale-100 transition-transform duration-[10s]"
         />
+        {/* متن روی تصویر */}
+        <div className="absolute bottom-12 left-12 z-20 text-white">
+          <h2 className="text-6xl font-black italic opacity-20 select-none">
+            NO PAIN NO GAIN
+          </h2>
+        </div>
       </section>
+
+      <style jsx global>{`
+        @keyframes pulse-slow {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.8;
+          }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
     </section>
   );
 }
