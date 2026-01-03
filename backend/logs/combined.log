@@ -3005,3 +3005,18 @@
 {"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"nationalId":1},"timestamp":"2026-01-03T17:48:45.840Z"}
 {"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"orgId":1},"timestamp":"2026-01-03T17:48:46.044Z"}
 {"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"email":1},"timestamp":"2026-01-03T17:48:46.249Z"}
+{"level":"info","message":"✅ MongoDB connected successfully","timestamp":"2026-01-03T17:52:37.918Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO roles.createIndex","query":{"name":1},"timestamp":"2026-01-03T17:52:38.106Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO users.createIndex","query":{"email":1},"timestamp":"2026-01-03T17:52:39.109Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO propertybasicstatuses.createIndex","query":{"propertyIdCode":1},"timestamp":"2026-01-03T17:52:39.117Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO contracts.createIndex","query":{"contractNumber":1},"timestamp":"2026-01-03T17:52:39.250Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO users.createIndex","query":{"employeeCode":1},"timestamp":"2026-01-03T17:52:39.316Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"nationalId":1},"timestamp":"2026-01-03T17:52:40.234Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"orgId":1},"timestamp":"2026-01-03T17:52:40.439Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"email":1},"timestamp":"2026-01-03T17:52:40.643Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T18:31:35.792Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T20:31:14.501Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T21:49:23.314Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T21:51:15.908Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T21:51:48.288Z"}
+{"level":"warn","message":"⚠️ MongoDB disconnected","timestamp":"2026-01-03T21:55:52.916Z"}
