@@ -2996,3 +2996,12 @@
 {"doc":{"limit":10,"skip":0,"sort":{"createdAt":-1}},"level":"debug","message":"MONGO owners.find","query":{},"timestamp":"2025-12-31T23:15:09.405Z"}
 {"doc":{},"level":"debug","message":"MONGO owners.countDocuments","query":{},"timestamp":"2025-12-31T23:15:09.658Z"}
 {"level":"info","message":"REQ_FINISH GET /api/owners?page=1&limit=10 30cbc277-5495-4a04-b643-cc889164845a { statusCode: 304, responseTimeMs: 482 }","timestamp":"2025-12-31T23:15:09.884Z"}
+{"level":"info","message":"✅ MongoDB connected successfully","timestamp":"2026-01-03T17:48:43.708Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO roles.createIndex","query":{"name":1},"timestamp":"2026-01-03T17:48:43.903Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO propertybasicstatuses.createIndex","query":{"propertyIdCode":1},"timestamp":"2026-01-03T17:48:44.920Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO users.createIndex","query":{"email":1},"timestamp":"2026-01-03T17:48:44.930Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO contracts.createIndex","query":{"contractNumber":1},"timestamp":"2026-01-03T17:48:45.125Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO users.createIndex","query":{"employeeCode":1},"timestamp":"2026-01-03T17:48:45.262Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"nationalId":1},"timestamp":"2026-01-03T17:48:45.840Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"orgId":1},"timestamp":"2026-01-03T17:48:46.044Z"}
+{"doc":{"background":true,"unique":true},"level":"debug","message":"MONGO owners.createIndex","query":{"email":1},"timestamp":"2026-01-03T17:48:46.249Z"}
