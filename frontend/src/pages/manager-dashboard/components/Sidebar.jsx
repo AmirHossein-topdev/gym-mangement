@@ -18,45 +18,49 @@ import {
 } from "lucide-react"; // استفاده از لوسید آیکون
 
 const menuItems = [
-  { label: "داشبورد", icon: <LayoutDashboard size={20} />, href: "/dashboard" },
+  {
+    label: "داشبورد",
+    icon: <LayoutDashboard size={20} />,
+    href: "/manager-dashboard",
+  },
   {
     label: "مدیریت اعضا",
     icon: <Users size={20} />,
-    href: "/dashboard/members",
+    href: "/manager-dashboard/users",
   },
   {
     label: "مربیان و پرسنل",
     icon: <UserRound size={20} />,
-    href: "/dashboard/trainers",
+    href: "/manager-dashboard/trainers",
   },
   {
     label: "حضور و غیاب",
     icon: <CalendarDays size={20} />,
-    href: "/dashboard/presence",
+    href: "/manager-dashboard/presence",
   },
   {
     label: "بوفه و رستوران",
     icon: <Coffee size={20} />,
-    href: "/dashboard/cafe",
+    href: "/manager-dashboard/cafe",
     subMenu: [
-      { label: "لیست منو", href: "/dashboard/cafe/menu" },
-      { label: "فروش روزانه", href: "/dashboard/cafe/sales" },
+      { label: "لیست منو", href: "/manager-dashboard/cafe/menu" },
+      { label: "فروش روزانه", href: "/manager-dashboard/cafe/sales" },
     ],
   },
   {
     label: "تجهیزات باشگاه",
     icon: <Dumbbell size={20} />,
-    href: "/dashboard/equipment",
+    href: "/manager-dashboard/equipment",
   },
   {
     label: "امور مالی",
     icon: <CreditCard size={20} />,
-    href: "/dashboard/finance",
+    href: "/manager-dashboard/finance",
   },
   {
     label: "تنظیمات سیستمی",
     icon: <Settings size={20} />,
-    href: "/dashboard/settings",
+    href: "/manager-dashboard/settings",
   },
 ];
 
@@ -73,8 +77,8 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
   }, [pathname, item.subMenu]);
 
   const isActive = pathname
-    ? item.href === "/dashboard"
-      ? pathname === "/dashboard"
+    ? item.href === "/manager-dashboard"
+      ? pathname === "/manager-dashboard"
       : pathname.startsWith(item.href)
     : false;
 

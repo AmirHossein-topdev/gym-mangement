@@ -80,7 +80,7 @@ export default function Header({ onOpenSidebar }) {
             <div className="relative">
               <div className="absolute inset-0 bg-yellow-400 rounded-full blur-md opacity-0 group-hover:opacity-40 transition-opacity"></div>
               <Image
-                src="https://randomuser.me/api/portraits/men/32.jpg"
+                src="https://randomuser.me/api/portraits/men/1.jpg"
                 width={48}
                 height={48}
                 alt="Admin"
