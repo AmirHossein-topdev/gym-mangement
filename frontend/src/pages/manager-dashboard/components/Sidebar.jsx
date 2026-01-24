@@ -41,11 +41,7 @@ const menuItems = [
   {
     label: "بوفه و رستوران",
     icon: <Coffee size={20} />,
-    href: "/manager-dashboard/cafe",
-    subMenu: [
-      { label: "لیست منو", href: "/manager-dashboard/cafe/menu" },
-      { label: "فروش روزانه", href: "/manager-dashboard/cafe/sales" },
-    ],
+    href: "/manager-dashboard/cafe-menu",
   },
   {
     label: "تجهیزات باشگاه",

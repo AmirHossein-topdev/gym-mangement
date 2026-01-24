@@ -13,10 +13,10 @@ const userRoutes = require("./routes/user.routes");
 const roleRoutes = require("./routes/role.routes");
 const propertyRoutes = require("./routes/property.routes");
 const ownerRoutes = require("./routes/owner.routes");
-const contractRoutes = require("./routes/contract.routes");
 const locationEnumsRoutes = require("./routes/locationEnums.routes");
 const authRoutes = require("./routes/auth.routes");
 const uploadRoutes = require("./routes/uploadDocument.routes");
+const cafeMenuRoutes = require("./routes/CafeMenu.routes");
 
 // --- Middleware ---
 const globalErrorHandler = require("./middleware/global-error-handler");
@@ -49,6 +49,8 @@ app.use(requestLogger);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+app.use("/api/menu", cafeMenuRoutes);
+
 // --- Connect to Database ---
 connectDB()
   .then(() => console.log("MongoDB connected successfully"))
@@ -63,7 +65,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/owners", ownerRoutes);
-app.use("/api/contracts", contractRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/location-enums", locationEnumsRoutes);
 app.use("/api/upload", uploadRoutes);

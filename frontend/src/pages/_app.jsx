@@ -1,3 +1,4 @@
+// frontend\src\pages\_app.jsx
 import { useRouter } from "next/router";
 import store from "@/redux/store";
 import { Provider } from "react-redux";
