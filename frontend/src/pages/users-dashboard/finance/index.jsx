@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import {
   Calendar,
-  CreditCard,
   ShieldCheck,
   UserPlus,
   Clock,
@@ -11,25 +10,59 @@ import {
   ShoppingCart,
   ArrowRight,
   TrendingUp,
-  Target,
 } from "lucide-react";
 import DashboardLayout from "../layout";
+import { useListUsersQuery } from "../../../redux/features/userApi";
+import moment from "moment-jalaali";
 
 export default function UserFinancePage() {
   const [includeProgram, setIncludeProgram] = useState(false);
 
-  // دیتای فرضی (بعداً از بک‌اند می‌آید)
-  const userData = {
-    joinDate: "۱۴۰۲/۰۵/۱۰",
-    monthsActive: 5,
-    daysRemaining: 12,
-    basePrice: 850000,
-    programPrice: 350000,
-  };
+  // گرفتن اطلاعات واقعی کاربر از API
+  const { data, isLoading, isError } = useListUsersQuery();
 
-  const totalPrice = includeProgram
-    ? userData.basePrice + userData.programPrice
-    : userData.basePrice;
+  const user = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+  if (isLoading || !user) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-24 text-yellow-400 font-black animate-pulse">
+          در حال بارگذاری اطلاعات مالی...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-24 text-red-500 font-black">
+          خطا در دریافت اطلاعات
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // محاسبه مقادیر داینامیک
+  const createdAt = user.createdAt ? new Date(user.createdAt) : new Date();
+  const joinDate = moment(createdAt).format("jYYYY/jMM/jDD");
+
+  const monthsActive = Math.max(
+    0,
+    Math.floor((new Date() - createdAt) / (1000 * 60 * 60 * 24 * 30))
+  );
+
+  const subscriptionEnd = new Date(createdAt);
+  subscriptionEnd.setDate(createdAt.getDate() + 30); // اشتراک ۳۰ روزه
+
+  const daysRemaining = Math.max(
+    0,
+    Math.ceil((subscriptionEnd - new Date()) / (1000 * 60 * 60 * 24))
+  );
+
+  const basePrice = user.basePrice || 850000; // پیش‌فرض
+  const programPrice = user.programPrice || 350000; // پیش‌فرض
+  const totalPrice = includeProgram ? basePrice + programPrice : basePrice;
 
   return (
     <DashboardLayout>
@@ -60,7 +93,7 @@ export default function UserFinancePage() {
                   </p>
                   <h3 className="text-white text-2xl font-black italic flex items-center gap-3">
                     <UserPlus className="text-yellow-400" size={24} />{" "}
-                    {userData.joinDate}
+                    {joinDate}
                   </h3>
                 </div>
                 <Calendar
@@ -77,7 +110,7 @@ export default function UserFinancePage() {
                   </p>
                   <h3 className="text-white text-2xl font-black italic flex items-center gap-3">
                     <TrendingUp className="text-blue-400" size={24} />{" "}
-                    {userData.monthsActive} ماه فعال
+                    {monthsActive} ماه فعال
                   </h3>
                 </div>
                 <Clock
@@ -100,7 +133,7 @@ export default function UserFinancePage() {
                 </div>
                 <div className="text-left">
                   <span className="text-yellow-400 text-4xl font-black italic">
-                    {userData.daysRemaining}
+                    {daysRemaining}
                   </span>
                   <span className="text-gray-500 text-xs font-black mr-2">
                     روز باقی‌مانده
@@ -112,9 +145,10 @@ export default function UserFinancePage() {
               <div className="w-full h-4 bg-gray-900 rounded-full overflow-hidden p-1 border border-gray-800">
                 <div
                   className="h-full bg-gradient-to-l from-yellow-400 to-yellow-600 rounded-full shadow-[0_0_15px_rgba(250,204,21,0.3)]"
-                  style={{ width: `${(userData.daysRemaining / 30) * 100}%` }}
+                  style={{ width: `${(daysRemaining / 30) * 100}%` }}
                 ></div>
               </div>
+
               <div className="flex justify-between mt-3 text-[10px] font-black text-gray-600 uppercase tracking-tighter">
                 <span>START DAY</span>
                 <span>EXPIRATION GATE</span>
@@ -171,7 +205,7 @@ export default function UserFinancePage() {
                     هزینه افزوده:
                   </span>
                   <span className="text-black font-black text-sm italic">
-                    ۳۵۰,۰۰۰ ت
+                    {programPrice.toLocaleString()} ت
                   </span>
                 </div>
               </div>
@@ -180,12 +214,12 @@ export default function UserFinancePage() {
               <div className="space-y-3 mb-8">
                 <div className="flex justify-between text-xs font-bold text-gray-500">
                   <span>شهریه پایه (یک ماه):</span>
-                  <span>{userData.basePrice.toLocaleString()} ت</span>
+                  <span>{basePrice.toLocaleString()} ت</span>
                 </div>
                 {includeProgram && (
                   <div className="flex justify-between text-xs font-bold text-blue-600">
                     <span>برنامه تمرینی اختصاصی:</span>
-                    <span>+{userData.programPrice.toLocaleString()} ت</span>
+                    <span>+{programPrice.toLocaleString()} ت</span>
                   </div>
                 )}
                 <div className="pt-4 border-t-2 border-dashed border-gray-200 flex justify-between items-center">

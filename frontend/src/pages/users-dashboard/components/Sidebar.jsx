@@ -12,6 +12,8 @@ import {
   ChevronUp,
   X,
   Zap,
+  Info,
+  UserRound,
 } from "lucide-react"; // استفاده از لوسید آیکون
 
 const menuItems = [
@@ -21,21 +23,43 @@ const menuItems = [
     href: "/users-dashboard",
   },
   {
-    label: "حضور و غیاب",
-    icon: <CalendarDays size={20} />,
-    href: "/users-dashboard/presence",
-  },
-
-  {
-    label: "هوازی",
-    icon: <Dumbbell size={20} />,
-    href: "/users-dashboard/aerobic",
+    label: "پروفایل من",
+    icon: <Info size={20} />,
+    href: "/users-dashboard/profile",
   },
   {
     label: "امور مالی",
     icon: <CreditCard size={20} />,
     href: "/users-dashboard/finance",
   },
+  {
+    label: "حضور و غیاب",
+    icon: <CalendarDays size={20} />,
+    href: "/users-dashboard/presence",
+  },
+  {
+    label: "برنامه تمرینی",
+    icon: <UserRound size={20} />,
+    href: "/users-dashboard/trainers",
+    subMenu: [
+      {
+        label: "برنامه تمرینی من",
+        icon: <Dumbbell size={16} />,
+        href: "/users-dashboard/trainers",
+      },
+      {
+        label: "درخواست برنامه تمرینی",
+        icon: <Dumbbell size={16} />,
+        href: "/users-dashboard/trainers/request-plan",
+      },
+    ],
+  },
+  {
+    label: "هوازی",
+    icon: <Dumbbell size={20} />,
+    href: "/users-dashboard/aerobic",
+  },
+
   {
     label: "بوفه و رستوران",
     icon: <Coffee size={20} />,
@@ -46,20 +70,20 @@ const menuItems = [
 function MenuItem({ item, pathname, onClose, level = 0 }) {
   const [open, setOpen] = useState(false);
 
+  // باز کردن خودکار زیرمنو اگر یکی از آیتم‌های زیر آن فعال باشد
   useEffect(() => {
     if (item.subMenu && pathname) {
       const matchSub = item.subMenu.some(
-        (sub) => pathname === sub.href || pathname.startsWith(sub.href)
+        (sub) => pathname === sub.href || pathname.startsWith(sub.href + "/"),
       );
       if (matchSub) setOpen(true);
     }
   }, [pathname, item.subMenu]);
 
-  const isActive = pathname
-    ? item.href === "/users-dashboard"
-      ? pathname === "/users-dashboard"
-      : pathname.startsWith(item.href)
-    : false;
+  // بررسی اینکه لینک فعلی فعال است یا نه
+  const isActive = item.subMenu
+    ? false // خود منوی والد با subMenu هیچوقت به طور مستقیم فعال نشود
+    : pathname === item.href;
 
   const paddingRight = 16 + level * 12;
 
@@ -68,22 +92,22 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
       <li className="list-none">
         <div
           className={`flex items-center justify-between rounded-xl p-3 mb-1 transition-all duration-200 cursor-pointer ${
-            isActive
+            open
               ? "bg-yellow-400/10 text-yellow-400"
               : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
           }`}
           style={{ paddingRight }}
+          onClick={() => setOpen(!open)}
         >
-          <div
-            className="flex items-center gap-3 flex-1"
-            onClick={() => setOpen(!open)}
-          >
+          <div className="flex items-center gap-3 flex-1">
             {item.icon}
             <span className="text-[14px] font-medium">{item.label}</span>
           </div>
-          <button onClick={() => setOpen(!open)}>
-            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
+          {item.subMenu.length > 0 && (
+            <button onClick={() => setOpen(!open)}>
+              {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          )}
         </div>
 
         {open && (
@@ -103,6 +127,7 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
     );
   }
 
+  // لینک عادی
   return (
     <li className="list-none">
       <Link
@@ -147,7 +172,18 @@ export default function Sidebar({ isMobileOpen, onClose }) {
     sidebarLogo?.addEventListener("click", toggleSidebar);
     return () => sidebarLogo?.removeEventListener("click", toggleSidebar);
   }, []);
-
+  let roleTitle = "کاربر";
+  if (pathname.includes("trainers-dashboard")) {
+    roleTitle = "مربی";
+  } else if (pathname.includes("manager-dashboard")) {
+    if (pathname.includes("users")) {
+      roleTitle = "کاربر";
+    } else if (pathname.includes("cafe")) {
+      roleTitle = "مدیر کافه";
+    } else {
+      roleTitle = "مدیر سیستم";
+    }
+  }
   return (
     <div
       id="sidebar"
@@ -201,7 +237,7 @@ export default function Sidebar({ isMobileOpen, onClose }) {
             AD
           </div>
           <div className="sidebar-text">
-            <p className="text-sm font-bold">مدیر سیستم</p>
+            <p className="text-sm font-bold">{roleTitle}</p>
             <p className="text-[10px] text-gray-500">خوش آمدید</p>
           </div>
         </div>

@@ -1,37 +1,90 @@
+"use client";
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ReCAPTCHA from "react-google-recaptcha";
+import { Shield, Dumbbell, Coffee, User, Eye, EyeOff } from "lucide-react";
 
-import { CloseEye, OpenEye } from "@/svg";
-import ErrorMsg from "../common/error-msg";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useLoginUserMutation } from "@/redux/features/auth/authApi";
+import ErrorMsg from "../common/error-msg";
 
-const AdminLoginForm = () => {
-  // 1. وضعیت برای تشخیص نوع ورود (user یا admin)
-  const [loginType, setLoginType] = useState("user"); // 'user' or 'admin'
+const ROLES = [
+  {
+    key: "user",
+    label: "اعضا",
+    icon: <User size={16} />,
+    accent: "yellow",
+    redirect: "/users-dashboard",
+  },
+  {
+    key: "coach",
+    label: "مربی",
+    icon: <Dumbbell size={16} />,
+    accent: "green",
+    redirect: "/trainers-dashboard",
+  },
+  {
+    key: "admin",
+    label: "مدیر باشگاه",
+    icon: <Shield size={16} />,
+    accent: "blue",
+    redirect: "/manager-dashboard",
+  },
+  {
+    key: "cafe",
+    label: "مدیر کافه",
+    icon: <Coffee size={16} />,
+    accent: "orange",
+    redirect: "/manager-dashboard/cafe",
+  },
+];
+
+const ACCENT_CLASSES = {
+  yellow: {
+    bg: "bg-yellow-400",
+    hover: "hover:bg-yellow-500",
+    text: "text-black",
+    shadow: "shadow-yellow-400/30",
+  },
+  blue: {
+    bg: "bg-blue-400",
+    hover: "hover:bg-blue-600",
+    text: "text-black",
+    shadow: "shadow-blue-500/30",
+  },
+  green: {
+    bg: "bg-green-500",
+    hover: "hover:bg-green-600",
+    text: "text-black",
+    shadow: "shadow-green-500/30",
+  },
+  orange: {
+    bg: "bg-orange-500",
+    hover: "hover:bg-orange-600",
+    text: "text-black",
+    shadow: "shadow-orange-500/30",
+  },
+};
+
+export default function UnifiedLoginForm() {
+  const [activeRole, setActiveRole] = useState(ROLES[0]);
   const [showPass, setShowPass] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
 
-  const [loginUser, { isLoading }] = useLoginUserMutation();
   const router = useRouter();
+  const [loginUser, { isLoading }] = useLoginUserMutation();
 
-  // 2. تغییر داینامیک اسکیمای اعتبارسنجی بر اساس نوع ورود
-  const schema = Yup.object().shape({
+  const schema = Yup.object({
     employeeCode: Yup.string()
-      .required(
-        loginType === "admin"
-          ? "لطفا کد سازمانی را وارد کنید"
-          : "لطفا شماره عضویت را وارد کنید"
-      )
-      .matches(/^[0-9]{6,12}$/, "فرمت وارد شده صحیح نیست"),
+      .required("شناسه ورود الزامی است")
+      .matches(/^[0-9]{4,15}$/, "فرمت شناسه نامعتبر است"),
     password: Yup.string()
       .required("رمز عبور الزامی است")
-      .min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+      .min(6, "حداقل ۶ کاراکتر"),
   });
 
   const {
@@ -43,165 +96,149 @@ const AdminLoginForm = () => {
     resolver: yupResolver(schema),
   });
 
-  // تغییر تب و پاکسازی فرم
-  const handleTabChange = (type) => {
-    setLoginType(type);
-    reset();
-  };
-
   const onSubmit = async (data) => {
     if (!captchaValue) {
-      notifyError("لطفاً تأیید کنید که ربات نیستید!");
+      notifyError("تأیید کپچا الزامی است");
       return;
     }
 
     try {
-      const res = await loginUser({
+      // 1️⃣ لاگین کاربر
+      const response = await loginUser({
         employeeCode: data.employeeCode,
         password: data.password,
-        role: loginType, // ارسال نقش به بک‌اِند در صورت نیاز
+        role: activeRole.key,
       }).unwrap();
 
-      notifySuccess(
-        `خوش آمدید! ورود به عنوان ${
-          loginType === "admin" ? "مدیر" : "عضو"
-        } موفقیت‌آمیز بود`
-      );
-      router.replace(loginType === "admin" ? "/admin/dashboard" : "/dashboard");
+      // فرض می‌کنیم response.user شامل اطلاعات کاربر است
+      const user = response.user;
+
+      if (!user) {
+        notifyError("اطلاعات کاربر دریافت نشد");
+        return;
+      }
+
+      // 2️⃣ ذخیره امن در sessionStorage (با JSON.stringify)
+      const safeUser = {
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        profileImage: user.profileImage,
+        email: user.email,
+        employeeCode: user.employeeCode,
+      };
+
+      sessionStorage.setItem("currentUser", JSON.stringify(safeUser));
+
+      // 3️⃣ لاگ برای دیباگ
+      console.log("✅ Current User Stored:", safeUser);
+
+      // 4️⃣ نمایش پیام موفقیت
+      notifySuccess(`ورود موفق | ${activeRole.label}`);
+
+      // 5️⃣ ریدایرکت بعد از ذخیره کاربر
+      router.replace(activeRole.redirect);
     } catch (err) {
-      const message = err?.data?.message || "ورود موفق نبود. مجدداً تلاش کنید.";
-      notifyError(message);
+      notifyError(err?.data?.message || "ورود ناموفق");
+      console.error("Login error:", err);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto" dir="rtl">
-      {/* --- بخش انتخاب نوع ورود (Tabs) --- */}
-      <div className="flex mb-0 bg-gray-100 p-1 rounded-t-2xl border-b-0">
-        <button
-          onClick={() => handleTabChange("user")}
-          className={`flex-1 py-3 text-sm font-bold rounded-t-xl transition-all ${
-            loginType === "user"
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          ورود اعضا
-        </button>
-        <button
-          onClick={() => handleTabChange("admin")}
-          className={`flex-1 py-3 text-sm font-bold rounded-t-xl transition-all ${
-            loginType === "admin"
-              ? "bg-white text-indigo-700 border-t-2 border-indigo-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          ورود مدیر باشگاه
-        </button>
-      </div>
-
-      {/* --- فرم اصلی --- */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className={`space-y-5 bg-white shadow-2xl p-8 rounded-b-2xl border-t-4 transition-colors duration-500 ${
-          loginType === "admin" ? "border-indigo-600" : "border-blue-500"
-        }`}
-      >
-        <div className="text-center space-y-2">
-          <h2
-            className={`text-2xl font-black ${
-              loginType === "admin" ? "text-indigo-900" : "text-blue-900"
-            }`}
-          >
-            {loginType === "admin"
-              ? "پنل مدیریت مجموعه"
-              : "پورتال اعضای باشگاه"}
-          </h2>
-          <p className="text-xs text-gray-400">اطلاعات حساب خود را وارد کنید</p>
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#0f1115] px-4"
+      dir="rtl"
+    >
+      <div className="w-full max-w-md bg-[#1a1d23] border border-gray-800 rounded-[2.5rem] shadow-2xl p-8">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-black italic text-white">
+            سیستم <span className="text-yellow-400">ورود نئون</span>
+          </h1>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-2">
+            Tactical Access Control
+          </p>
         </div>
 
-        {/* فیلد کد (تغییر لیبل و آیکون به صورت بصری) */}
-        <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-700 mr-1">
-            {loginType === "admin" ? "کد پرسنلی / سازمانی" : "شماره عضویت"}
-          </label>
-          <input
-            {...register("employeeCode")}
-            type="text"
-            placeholder={
-              loginType === "admin" ? "مثلا: 100200" : "شماره عضویت ۱۰ رقمی"
-            }
-            className={`w-full px-4 py-3 rounded-lg border transition-all outline-none ${
-              errors.employeeCode
-                ? "border-red-500 bg-red-50"
-                : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            }`}
-          />
-          <ErrorMsg msg={errors.employeeCode?.message} />
+        {/* Role Selector */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          {ROLES.map((role) => (
+            <button
+              key={role.key}
+              type="button"
+              onClick={() => {
+                setActiveRole(role);
+                reset();
+              }}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black italic transition-all
+                ${
+                  activeRole.key === role.key
+                    ? `bg-${role.accent}-400 text-black shadow-lg scale-105`
+                    : "bg-[#0f1115] text-gray-500 border border-gray-800 hover:border-gray-600"
+                }`}
+            >
+              {role.icon}
+              {role.label}
+            </button>
+          ))}
         </div>
 
-        {/* فیلد رمز عبور */}
-        <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-700 mr-1">
-            رمز عبور
-          </label>
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div>
+            <input
+              {...register("employeeCode")}
+              placeholder="شناسه ورود"
+              className="w-full bg-[#0f1115] border border-gray-800 rounded-xl py-4 px-4 text-white font-bold focus:outline-none focus:border-yellow-400"
+            />
+            <ErrorMsg msg={errors.employeeCode?.message} />
+          </div>
+
           <div className="relative">
             <input
               {...register("password")}
               type={showPass ? "text" : "password"}
-              className={`w-full px-4 py-3 rounded-lg border transition-all outline-none ${
-                errors.password
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              }`}
+              placeholder="رمز عبور"
+              className="w-full bg-[#0f1115] border border-gray-800 rounded-xl py-4 px-4 text-white font-bold focus:outline-none focus:border-yellow-400"
             />
-            <div
-              className="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-blue-600"
+            <button
+              type="button"
               onClick={() => setShowPass(!showPass)}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
             >
-              {showPass ? <CloseEye /> : <OpenEye />}
-            </div>
+              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+            <ErrorMsg msg={errors.password?.message} />
           </div>
-          <ErrorMsg msg={errors.password?.message} />
-        </div>
 
-        <div className="flex items-center justify-between text-xs">
-          <label className="flex items-center gap-2 cursor-pointer text-gray-500">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300"
+          {/* CAPTCHA */}
+          <div className="flex justify-center scale-90">
+            <ReCAPTCHA
+              sitekey="6LdnLyAsAAAAANcQ13SwbVVzuOhdHmjmbDiyGnkK"
+              onChange={(val) => setCaptchaValue(val)}
+              hl="fa"
             />
-            مرا به خاطر بسپار
-          </label>
-          <Link href="/forgot" className="text-blue-600 hover:underline">
-            فراموشی رمز عبور؟
-          </Link>
-        </div>
+          </div>
 
-        <div className="flex justify-center scale-90">
-          <ReCAPTCHA
-            sitekey="6LdnLyAsAAAAANcQ13SwbVVzuOhdHmjmbDiyGnkK"
-            onChange={(val) => setCaptchaValue(val)}
-            hl="fa"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full py-3.5 rounded-xl text-white font-bold transition-all transform active:scale-95 shadow-lg disabled:opacity-50 ${
-            loginType === "admin"
-              ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200"
-              : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
-          }`}
-        >
-          {isLoading
-            ? "در حال پردازش..."
-            : `ورود به عنوان ${loginType === "admin" ? "مدیر" : "عضو"}`}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`
+              w-full py-4 rounded-xl font-black italic transition-all
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${ACCENT_CLASSES[activeRole.accent].bg}
+              ${ACCENT_CLASSES[activeRole.accent].hover}
+              ${ACCENT_CLASSES[activeRole.accent].text}
+              ${ACCENT_CLASSES[activeRole.accent].shadow}
+              shadow-lg
+            `}
+          >
+            {isLoading
+              ? "در حال احراز..."
+              : `ورود به عنوان ${activeRole.label}`}
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
-
-export default AdminLoginForm;
+}

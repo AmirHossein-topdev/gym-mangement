@@ -1,46 +1,47 @@
-// frontend\src\pages\dashboard\main\users\[id]\edit\index.jsx
+// frontend\src\pages\manager-dashboard\users\[id]\edit\index.jsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import Swal from "sweetalert2";
-import DashboardLayout from "../../../../layout";
 import Link from "next/link";
-import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa";
+import DashboardLayout from "../../../layout";
+import { FaBirthdayCake } from "react-icons/fa";
+import { useRouter } from "next/router";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  UserPlus,
+  Image as ImageIcon,
+  ShieldCheck,
+  User,
+  Hash,
+  Mail,
+  Phone,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
+
 import {
   useGetUserByIdQuery,
   useUpdateUserMutation,
-} from "../../../../../../redux/features/userApi";
+} from "../../../../../redux/features/userApi";
 
 const ROLE_OPTIONS = [
-  { value: "Admin", label: "مدیر" },
-  { value: "Manager", label: "مدیر ارشد" },
-  { value: "Agent", label: "نماینده" },
-  { value: "Customer Support", label: "پشتیبانی مشتری" },
+  { value: "Member", label: "ورزشکار (عضو)" },
+  { value: "Trainer", label: "مربی" },
+  { value: "Reception", label: "پذیرش باشگاه" },
+  { value: "Admin", label: "مدیر سیستم" },
   { value: "Accountant", label: "حسابدار" },
-  { value: "Inspector", label: "بازرس" },
 ];
 
 export default function EditUserPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [userId, setUserId] = useState(null);
-
-  // وقتی id آماده شد userId ست میشه
-  useEffect(() => {
-    if (id) {
-      setUserId(id);
-    }
-  }, [id]);
-
-  const { data, isLoading, isError } = useGetUserByIdQuery(userId, {
-    skip: !userId, // فقط وقتی userId ست شد query اجرا شود
-  });
-
-  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
-
   const [showPassword, setShowPassword] = useState(false);
+  const [previewOld, setPreviewOld] = useState("");
+  const [previewNew, setPreviewNew] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     employeeCode: "",
@@ -49,32 +50,44 @@ export default function EditUserPage() {
     email: "",
     contactNumber: "",
     address: "",
+    birthday: "",
     profileImage: null,
-    status: "inactive",
+    status: "active",
   });
-  const [previewOld, setPreviewOld] = useState("");
-  const [previewNew, setPreviewNew] = useState("");
 
-  // بارگذاری اطلاعات کاربر وقتی data آماده شد
+  const { data, isLoading, isError } = useGetUserByIdQuery(id, { skip: !id });
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+
   useEffect(() => {
-    if (!data) return;
+    if (!id) return; // اگر id هنوز نیومده، fetch نکن
 
-    const user = data;
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`http://localhost:7000/api/users/${id}`);
+        const result = await res.json();
 
-    setFormData({
-      name: user.name ?? "",
-      employeeCode: user.employeeCode ?? "",
-      password: "", // خالی — فقط برای تغییر رمز جدید
-      role: user.role?.name ?? "",
-      email: user.email ?? "",
-      contactNumber: user.contactNumber ?? "",
-      address: user.address ?? "",
-      profileImage: user.profileImage ?? null,
-      status: user.status ?? "inactive",
-    });
+        if (result?.user) {
+          setFormData({
+            name: result.user.name ?? "",
+            employeeCode: result.user.employeeCode ?? "",
+            password: "",
+            role: result.user.role ?? "",
+            email: result.user.email ?? "",
+            contactNumber: result.user.contactNumber ?? "",
+            address: result.user.address ?? "",
+            birthday: result.user.birthday ?? "",
+            profileImage: result.user.profileImage ?? null,
+            status: result.user.status ?? "active",
+          });
+          setPreviewOld(result.user.profileImage ?? "");
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
 
-    setPreviewOld(user.profileImage ? `${user.profileImage}` : "");
-  }, [data]);
+    fetchData();
+  }, [id]); // فقط وقتی id تغییر کرد اجرا میشه
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -90,39 +103,39 @@ export default function EditUserPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const formToSend = new FormData();
-      for (const key in formData) {
-        const val = formData[key];
-        // مهم: وقتی فایل انتخاب شده است (File object) آن را append کن، وقتی profileImage یک string (مسیر قدیمی) است
-        // و کاربر فایل جدید انتخاب نکرده است، اگر می‌خواهی مسیر قدیمی را نگه داری نیازی به append نیست.
-        if (val !== null && val !== undefined) {
-          // اگر profileImage فایل است (object) append کن، وگرنه اگر رشته است (مسیر)، append کن هم پذیرفته می‌شود.
-          formToSend.append(key, val);
+      const form = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === "profileImage") {
+          if (formData[key] instanceof File) form.append(key, formData[key]);
+        } else {
+          form.append(key, formData[key]);
         }
-      }
-
-      // مطابق RTK mutation: { id, formData }
-      await updateUser({ id: userId, formData: formToSend }).unwrap();
-
-      await Swal.fire({
-        icon: "success",
-        title: "ویرایش کاربر با موفقیت انجام شد",
-        confirmButtonText: "باشه",
       });
 
-      router.push("/dashboard/main/users");
+      await updateUser({ id, formData: form }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: "ویرایش کاربر با موفقیت انجام شد",
+        background: "#1a1d23",
+        color: "#fff",
+        confirmButtonColor: "#facc15",
+        confirmButtonText: "باشه",
+      }).then(() => router.push("/manager-dashboard/users"));
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "خطا!",
-        text: err?.data?.message || "مشکلی در ویرایش کاربر رخ داد",
+        title: "خطا در ویرایش اطلاعات",
+        text: err?.data?.message || "لطفاً ورودی‌ها را بررسی کنید",
+        background: "#1a1d23",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
       });
     }
   };
 
-  if (!userId || isLoading)
+  if (!id || isLoading)
     return (
       <DashboardLayout>
         <div className="text-white text-center py-10">در حال بارگذاری...</div>
@@ -140,177 +153,259 @@ export default function EditUserPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
+      <div
+        className="p-4 sm:p-8 min-h-screen bg-[#0f1115] rounded-[2.5rem] border border-gray-800 shadow-2xl"
+        dir="rtl"
+      >
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-10 pb-6 border-b border-gray-800">
           <Link
-            href="/dashboard/main/users"
-            className="text-green-400 hover:text-green-600 flex items-center gap-2"
+            href="/manager-dashboard/users"
+            className="p-3 bg-gray-800 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all rounded-xl"
           >
-            <FaArrowRight /> بازگشت به کاربران
+            <ArrowRight size={24} />
           </Link>
-          <h2 className="text-2xl font-bold text-white">ویرایش کاربر</h2>
+          <div>
+            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">
+              ویرایش <span className="text-yellow-400">کاربر</span>
+            </h2>
+            <p className="text-gray-500 text-[10px] uppercase tracking-[0.3em]">
+              Edit User Information
+            </p>
+          </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4"
-        >
-          {/* نام */}
-          <div>
-            <label className="text-gray-300 mb-1 block">نام کامل</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* کد سازمانی */}
-          <div>
-            <label className="text-gray-300 mb-1 block">کد سازمانی</label>
-            <input
-              type="text"
-              name="employeeCode"
-              value={formData.employeeCode}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* رمز عبور */}
-          <div className="relative">
-            <label className="text-gray-300 mb-1 block">رمز عبور</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute bottom-3 left-3 transform -translate-y-1/2 text-gray-400 hover:text-green-500"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-
-          {/* ایمیل */}
-          <div>
-            <label className="text-gray-300 mb-1 block">ایمیل</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* نقش */}
-          <div>
-            <label className="text-gray-300 mb-1 block">نقش</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">انتخاب نقش...</option>
-              {ROLE_OPTIONS.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* شماره تماس */}
-          <div>
-            <label className="text-gray-300 mb-1 block">شماره تماس</label>
-            <input
-              type="text"
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* آدرس */}
-          <div>
-            <label className="text-gray-300 mb-1 block">آدرس</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* تصویر پروفایل */}
-          <div>
-            <label className="text-gray-300 mb-1 block">تصویر پروفایل</label>
-            <div className="flex items-center gap-4">
-              <label className="w-1/5 min-w-[140px] flex items-center justify-center border border-gray-700 bg-gray-900 text-white rounded-xl p-3 cursor-pointer hover:bg-gray-800 transition">
-                {formData.profileImage ? "تغییر فایل" : "انتخاب فایل"}
+        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8">
+          <div className="bg-[#1a1d23] p-6 lg:p-10 rounded-3xl border border-gray-800 shadow-inner">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* نام کامل */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <User size={16} className="text-yellow-400" /> نام و نام
+                  خانوادگی
+                </label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all shadow-sm"
+                  placeholder="مثال: علی فلاح"
                 />
-              </label>
-              <span className="text-gray-400 text-sm">
-                {formData.profileImage
-                  ? formData.profileImage.name
-                  : "فایلی انتخاب نشده"}
-              </span>
-              {previewNew ? (
-                <img
-                  src={previewNew}
-                  className="w-16 h-16 object-cover rounded-lg border border-gray-700"
+              </div>
+
+              {/* کد عضویت */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <Hash size={16} className="text-yellow-400" /> کد عضویت / کد
+                  ملی
+                </label>
+                <input
+                  type="text"
+                  name="employeeCode"
+                  value={formData.employeeCode}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all shadow-sm"
+                  placeholder="شماره شناسایی"
                 />
-              ) : previewOld ? (
-                <img
-                  src={previewOld}
-                  className="w-16 h-16 object-cover rounded-lg border border-gray-700"
+              </div>
+
+              {/* رمز عبور */}
+              <div className="space-y-2 relative">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <ShieldCheck size={16} className="text-yellow-400" /> رمز عبور
+                  پنل
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-yellow-400 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* نقش */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <UserPlus size={16} className="text-yellow-400" /> سطح دسترسی
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all appearance-none cursor-pointer"
+                >
+                  <option value="">انتخاب نقش کاربر...</option>
+                  {ROLE_OPTIONS.map((role) => (
+                    <option
+                      key={role.value}
+                      value={role.value}
+                      className="bg-gray-900"
+                    >
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* تاریخ تولد */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <FaBirthdayCake size={16} className="text-yellow-400" /> تاریخ
+                  تولد
+                </label>
+                <input
+                  type="text"
+                  name="birthday"
+                  value={formData.birthday}
+                  onChange={handleChange}
+                  placeholder="مثال: 1383/06/03"
+                  pattern="\d{4}/\d{2}/\d{2}"
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all"
                 />
-              ) : null}
+              </div>
+
+              {/* شماره تماس */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <Phone size={16} className="text-yellow-400" /> شماره موبایل
+                </label>
+                <input
+                  type="text"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleChange}
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all text-left"
+                  dir="ltr"
+                  placeholder="0912XXXXXXX"
+                />
+              </div>
+
+              {/* ایمیل */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <Mail size={16} className="text-yellow-400" /> پست الکترونیک
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all"
+                  placeholder="example@gym.com"
+                />
+              </div>
+
+              {/* آدرس */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <MapPin size={16} className="text-yellow-400" /> آدرس محل
+                  سکونت
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all"
+                />
+              </div>
+
+              {/* تصویر پروفایل */}
+              <div className="md:col-span-2 space-y-4">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <ImageIcon size={16} className="text-yellow-400" /> تصویر
+                  پروفایل
+                </label>
+                <div className="flex flex-wrap items-center gap-6 p-4 bg-[#0f1115] border-2 border-dashed border-gray-700 rounded-3xl">
+                  <label className="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-xl cursor-pointer transition-all font-black text-xs uppercase shadow-lg">
+                    <UserPlus size={16} /> انتخاب فایل
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {previewNew ? (
+                    <div className="flex items-center gap-3 bg-gray-800/50 p-2 rounded-2xl border border-gray-700">
+                      <img
+                        src={previewNew}
+                        alt="Preview"
+                        className="w-16 h-16 object-cover rounded-xl border-2 border-yellow-400"
+                      />
+                      <span className="text-xs text-gray-300 max-w-[150px] truncate">
+                        {formData.profileImage.name}
+                      </span>
+                    </div>
+                  ) : previewOld ? (
+                    <img
+                      src={previewOld}
+                      alt="Old Preview"
+                      className="w-16 h-16 object-cover rounded-xl border border-gray-700"
+                    />
+                  ) : (
+                    <span className="text-gray-500 text-xs italic">
+                      عکسی انتخاب نشده است (فرمت های مجاز: JPG, PNG)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* وضعیت حساب */}
+              <div className="md:col-span-2 space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <CheckCircle2 size={16} className="text-yellow-400" /> وضعیت
+                  اولیه حساب
+                </label>
+                <div className="flex gap-4">
+                  {["active", "inactive"].map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setFormData((p) => ({ ...p, status }))}
+                      className={`flex-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border ${
+                        formData.status === status
+                          ? "bg-yellow-400 text-black border-yellow-400 shadow-[0_5px_15px_rgba(250,204,21,0.2)]"
+                          : "bg-transparent text-gray-500 border-gray-800 hover:border-gray-600"
+                      }`}
+                    >
+                      {status === "active"
+                        ? "فعال (Active)"
+                        : "غیرفعال (Inactive)"}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* وضعیت */}
-          <div>
-            <label className="text-gray-300 mb-1 block">وضعیت</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="inactive">غیرفعال</option>
-              <option value="active">فعال</option>
-              <option value="blocked">مسدود</option>
-            </select>
-          </div>
-
-          {/* دکمه ذخیره */}
-          <div className="text-center mt-4">
+          {/* دکمه ارسال نهایی */}
+          <div className="flex justify-center pb-10">
             <button
               type="submit"
               disabled={isUpdating}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-all shadow-md hover:shadow-lg"
+              className="group relative w-full max-w-md bg-yellow-400 hover:bg-yellow-500 text-black px-10 py-5 rounded-2xl font-black text-lg italic transition-all shadow-[0_20px_40px_rgba(250,204,21,0.15)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
             >
-              {isUpdating ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                {isUpdating ? "در حال ذخیره تغییرات..." : "ذخیره تغییرات"}
+                {!isUpdating && <UserPlus size={22} />}
+              </span>
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
           </div>
         </form>

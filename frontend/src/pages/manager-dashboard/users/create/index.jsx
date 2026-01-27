@@ -20,13 +20,14 @@ import {
 import Link from "next/link";
 import DashboardLayout from "../../layout";
 import { useRouter } from "next/navigation";
+import { FaBirthdayCake } from "react-icons/fa";
 
 const ROLE_OPTIONS = [
   { value: "Member", label: "ورزشکار (عضو)" },
   { value: "Trainer", label: "مربی" },
-  { value: "Reception", label: "پذیرش باشگاه" },
   { value: "Admin", label: "مدیر سیستم" },
-  { value: "Accountant", label: "حسابدار" },
+  { value: "CafeManager", label: "مدیر کافه" },
+  { value: "Reception", label: "پذیرش باشگاه" },
 ];
 
 export default function CreateUserPage() {
@@ -78,7 +79,7 @@ export default function CreateUserPage() {
         confirmButtonColor: "#facc15",
         confirmButtonText: "فهمیدم",
       }).then(() => {
-        router.push("/dashboard/main/users");
+        router.push("/manager-dashboard/users");
       });
     } catch (err) {
       Swal.fire({
@@ -204,19 +205,20 @@ export default function CreateUserPage() {
                 </select>
               </div>
 
-              {/* ایمیل */}
+              {/* تاریخ تولد شمسی */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
-                  <Mail size={16} className="text-yellow-400" /> پست الکترونیک
+                  <FaBirthdayCake size={16} className="text-yellow-400" /> تاریخ
+                  تولد
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="birthday"
+                  value={formData.birthday}
                   onChange={handleChange}
-                  required
+                  placeholder="مثال: 1383/06/03"
+                  pattern="\d{4}/\d{2}/\d{2}"
                   className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all"
-                  placeholder="example@gym.com"
                 />
               </div>
 
@@ -236,6 +238,20 @@ export default function CreateUserPage() {
                 />
               </div>
 
+              {/* ایمیل */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">
+                  <Mail size={16} className="text-yellow-400" /> پست الکترونیک
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full bg-[#0f1115] border border-gray-700 text-white rounded-2xl p-4 focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 outline-none transition-all"
+                  placeholder="example@gym.com"
+                />
+              </div>
               {/* آدرس */}
               <div className="space-y-2 md:col-span-2">
                 <label className="flex items-center gap-2 text-gray-400 font-bold text-sm mr-2">

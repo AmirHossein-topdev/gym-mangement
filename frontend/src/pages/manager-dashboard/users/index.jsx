@@ -5,6 +5,7 @@ import {
   useListUsersQuery,
   useDeleteUserMutation,
 } from "../../../redux/features/userApi";
+import moment from "moment-jalaali";
 import {
   Edit3,
   Trash2,
@@ -111,6 +112,10 @@ export default function UsersPage() {
 
   const users = Array.isArray(data) ? data : [];
 
+  console.log("====================================");
+  console.log(data);
+  console.log("====================================");
+
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "آیا مطمئن هستید؟",
@@ -182,10 +187,10 @@ export default function UsersPage() {
           </div>
 
           <Link
-            href="/dashboard/users/create"
+            href="/manager-dashboard/users/create"
             className="w-full md:w-auto flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-2xl text-sm font-black transition-all shadow-[0_10px_20px_rgba(250,204,21,0.2)] active:scale-95"
           >
-            <UserPlus size={18} /> افزودن ورزشکار جدید
+            <UserPlus size={18} /> افزودن جدید
           </Link>
         </div>
 
@@ -214,6 +219,7 @@ export default function UsersPage() {
                 <th className="py-5 px-6 font-black">کد عضویت</th>
                 <th className="py-5 px-6 font-black">تماس</th>
                 <th className="py-5 px-6 font-black">نقش</th>
+                <th className="py-5 px-6 font-black">تاریخ عضویت</th>
                 <th className="py-5 px-6 font-black text-center">وضعیت</th>
                 <th className="py-5 px-6 font-black text-center">عملیات</th>
               </tr>
@@ -264,9 +270,15 @@ export default function UsersPage() {
                     <td className="py-4 px-6">
                       <span className="flex items-center gap-1.5 text-xs text-gray-300 bg-gray-800 px-2 py-1 rounded-md w-fit">
                         <ShieldCheck size={12} className="text-blue-400" />{" "}
-                        {user.role.name}
+                        {user.role}
                       </span>
                     </td>
+                    <td className="py-4 px-6 text-gray-400 font-mono text-[12px]">
+                      {user.createdAt
+                        ? moment(user.createdAt).format("jYYYY/jMM/jDD")
+                        : "-"}
+                    </td>
+
                     <td className="py-4 px-6 text-center">
                       <span
                         className={`inline-block w-2.5 h-2.5 rounded-full ${
@@ -279,7 +291,7 @@ export default function UsersPage() {
                     <td className="py-4 px-6">
                       <div className="flex justify-center gap-2">
                         <Link
-                          href={`/dashboard/users/${user._id}/edit`}
+                          href={`/manager-dashboard/users/${user._id}/edit`}
                           className="p-2 bg-gray-800 text-gray-400 hover:text-yellow-400 hover:bg-gray-700 rounded-lg transition-all"
                         >
                           <Edit3 size={16} />

@@ -10,13 +10,10 @@ const connectDB = require("./config/db"); // مسیر فایل کانکت DB (CJ
 
 // --- Routes ---
 const userRoutes = require("./routes/user.routes");
-const roleRoutes = require("./routes/role.routes");
-const propertyRoutes = require("./routes/property.routes");
-const ownerRoutes = require("./routes/owner.routes");
-const locationEnumsRoutes = require("./routes/locationEnums.routes");
 const authRoutes = require("./routes/auth.routes");
 const uploadRoutes = require("./routes/uploadDocument.routes");
 const cafeMenuRoutes = require("./routes/CafeMenu.routes");
+const trainingRequestRoutes = require("./routes/trainingRequest.routes");
 
 // --- Middleware ---
 const globalErrorHandler = require("./middleware/global-error-handler");
@@ -30,7 +27,12 @@ const PORT = process.env.PORT || 7000;
 
 // --- Basic Middlewares ---
 // CORS
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // آدرس فرانت‌اند
+    credentials: true, // مهم برای ارسال کوکی‌ها
+  })
+);
 
 // Body parsers (important: parse body BEFORE requestLogger if you want to log body)
 app.use(express.json({ limit: "10mb" }));
@@ -62,13 +64,9 @@ connectDB()
 
 // --- API Routes ---
 app.use("/api/users", userRoutes);
-app.use("/api/roles", roleRoutes);
-app.use("/api/properties", propertyRoutes);
-app.use("/api/owners", ownerRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/location-enums", locationEnumsRoutes);
 app.use("/api/upload", uploadRoutes);
-
+app.use("/api/training-requests", trainingRequestRoutes);
 // --- Root Route ---
 app.get("/", (req, res) => res.send("Server is running successfully"));
 

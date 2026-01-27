@@ -165,6 +165,18 @@ export default function Sidebar({ isMobileOpen, onClose }) {
     return () => sidebarLogo?.removeEventListener("click", toggleSidebar);
   }, []);
 
+  let roleTitle = "کاربر";
+  if (pathname.includes("trainers-dashboard")) {
+    roleTitle = "مربی";
+  } else if (pathname.includes("manager-dashboard")) {
+    if (pathname.includes("users-dashboard")) {
+      roleTitle = "کاربر";
+    } else if (pathname.includes("cafe-dashboard")) {
+      roleTitle = "مدیر کافه";
+    } else {
+      roleTitle = "مدیر سیستم";
+    }
+  }
   return (
     <div
       id="sidebar"
@@ -218,7 +230,7 @@ export default function Sidebar({ isMobileOpen, onClose }) {
             AD
           </div>
           <div className="sidebar-text">
-            <p className="text-sm font-bold">مدیر سیستم</p>
+            <p className="text-sm font-bold">{roleTitle}</p>
             <p className="text-[10px] text-gray-500">خوش آمدید</p>
           </div>
         </div>

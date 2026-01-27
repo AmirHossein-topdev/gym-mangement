@@ -1,7 +1,6 @@
 // backend/model/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { ObjectId } = mongoose.Schema.Types;
 
 const userSchema = mongoose.Schema(
   {
@@ -14,17 +13,7 @@ const userSchema = mongoose.Schema(
       maxLength: [100, "Name is too large"],
     },
 
-    // ایمیل کاربر
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      match: [/\S+@\S+\.\S+/, "Please provide a valid email address"],
-    },
-
-    // کد سازمانی منحصر به فرد (شناسه ورود)
+    // کد عضویت یا کد ملی
     employeeCode: {
       type: String,
       required: [true, "Employee code is required"],
@@ -41,35 +30,50 @@ const userSchema = mongoose.Schema(
       minLength: 6,
     },
 
-    // نقش کاربر (مدیر / کاربر معمولی / ... )
+    // نقش کاربر
     role: {
-      type: ObjectId,
-      ref: "Role",
-      required: true,
+      type: String,
+      enum: ["Member", "Trainer", "Reception", "Admin", "CafeManager"],
+      required: [true, "Role is required"],
+      default: "Member",
     },
 
-    // شماره تماس اختیاری
+    // ایمیل (اختیاری)
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      match: [/\S+@\S+\.\S+/, "Please provide a valid email address"],
+    },
+
+    // شماره تماس
     contactNumber: {
       type: String,
       trim: true,
     },
 
-    // آدرس اختیاری
+    // آدرس
     address: {
       type: String,
       trim: true,
     },
 
-    // تصویر پروفایل اختیاری
+    // تصویر پروفایل
     profileImage: {
       type: String,
     },
 
-    // وضعیت دسترسی کاربر
+    // وضعیت حساب
     status: {
       type: String,
       enum: ["active", "inactive", "blocked"],
-      default: "inactive",
+      default: "active",
+    },
+
+    // تاریخ تولد شمسی (به صورت رشته YYYY/MM/DD)
+    birthday: {
+      type: String,
+      match: [/^\d{4}\/\d{2}\/\d{2}$/, "Birthday must be in YYYY/MM/DD format"],
     },
 
     // تاریخ آخرین تغییر رمز عبور
@@ -103,9 +107,14 @@ userSchema.methods.generatePasswordResetToken = function () {
   const token = crypto.randomBytes(32).toString("hex");
   this.passwordResetToken = token;
   const date = new Date();
-  date.setHours(date.getHours() + 1); // اعتبار 1 ساعت
+  date.setHours(date.getHours() + 1);
   this.passwordResetExpires = date;
   return token;
+};
+
+// چک کردن نقش
+userSchema.methods.hasRole = function (...roles) {
+  return roles.includes(this.role);
 };
 
 const User = mongoose.model("User", userSchema);
