@@ -32,7 +32,7 @@ const ROLE_OPTIONS = [
   { value: "Trainer", label: "مربی" },
   { value: "Reception", label: "پذیرش باشگاه" },
   { value: "Admin", label: "مدیر سیستم" },
-  { value: "Accountant", label: "حسابدار" },
+  { value: "CafeManager", label: "متصدی کافه " },
 ];
 
 export default function EditUserPage() {

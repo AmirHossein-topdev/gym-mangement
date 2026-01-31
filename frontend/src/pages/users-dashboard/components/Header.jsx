@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useListUsersQuery } from "@/redux/features/userApi"; // استفاده از الگوی پروژه
 import Link from "next/link";
+import { useRouter } from "next/router";
+import Swal from "sweetalert2";
 
 export default function Header({ onOpenSidebar }) {
   const [showProfileInfo, setShowProfileInfo] = useState(false);
@@ -36,6 +38,33 @@ export default function Header({ onOpenSidebar }) {
   const displayRole =
     typeof user?.role === "string" ? user.role : user?.role?.name || "کاربر";
   const isActive = user?.status === "active";
+
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "خروج از حساب",
+      text: "آیا مطمئن هستید که می‌خواهید خارج شوید؟",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "بله، خارج شو",
+      cancelButtonText: "انصراف",
+      confirmButtonColor: "#facc15", // زرد
+      cancelButtonColor: "#374151", // خاکستری
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      // 🔥 پاک کردن کل sessionStorage
+      sessionStorage.clear();
+
+      // (اختیاری) اگر localStorage هم داری
+      // localStorage.clear();
+
+      // ریدایرکت امن به صفحه اصلی
+      router.replace("/");
+    }
+  };
 
   return (
     <header className="flex items-center justify-between px-6 mb-3 py-4 bg-[#1a1d23]/50 backdrop-blur-md border border-gray-800 rounded-[2rem] sticky top-4 z-50 shadow-2xl transition-all duration-500 hover:border-yellow-400/30">
@@ -161,7 +190,10 @@ export default function Header({ onOpenSidebar }) {
                   ویرایش اطلاعات
                 </Link>
 
-                <button className="w-full flex items-center justify-end gap-3 p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all text-sm font-bold italic border border-transparent hover:border-red-400/20">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-end gap-3 p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all text-sm font-bold italic border border-transparent hover:border-red-400/20"
+                >
                   خروج از حساب
                 </button>
 

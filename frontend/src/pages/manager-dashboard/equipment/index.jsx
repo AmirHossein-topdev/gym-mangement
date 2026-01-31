@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { useGetEquipmentsQuery } from "@/redux/features/equipmentApi";
+
+import Link from "next/link";
 import {
   Dumbbell,
   Wrench,
@@ -12,7 +15,11 @@ import {
   History,
   TrendingDown,
   Info,
+  Link as LinkIcon,
+  Edit3,
+  Trash2,
 } from "lucide-react";
+
 import {
   PieChart,
   Pie,
@@ -30,41 +37,48 @@ const equipmentStatusData = [
 ];
 
 export default function EquipmentPage() {
-  const inventory = [
-    {
-      id: "EQ-401",
-      name: "پرس پا وزنه‌آزاد",
-      brand: "Matrix",
-      health: 95,
-      lastService: "۱۴۰۲/۰۹/۱۰",
-      status: "عملیاتی",
-    },
-    {
-      id: "EQ-402",
-      name: "تردمیل سری X8",
-      brand: "Technogym",
-      health: 40,
-      lastService: "۱۴۰۲/۰۵/۲۰",
-      status: "نیاز به تعمیر",
-    },
-    {
-      id: "EQ-403",
-      name: "هاگ پا ماشین",
-      brand: "DHZ",
-      health: 82,
-      lastService: "۱۴۰۲/۰۸/۰۵",
-      status: "عملیاتی",
-    },
-    {
-      id: "EQ-404",
-      name: "دستگاه سیم‌کش دوطرفه",
-      brand: "Body-Solid",
-      health: 15,
-      lastService: "۱۴۰۱/۱۲/۱۲",
-      status: "بحرانی",
-    },
-  ];
+  // داخل تابع کامپوننت (مثلاً بالای return)
+  const {
+    data: equipments = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetEquipmentsQuery();
 
+  // normalize و map کردن به آرایه inventory مورد استفاده در جدول
+  const inventory = React.useMemo(() => {
+    // handle cases: equipments ممکنه [] یا { data: [...] } یا هر ساختار دیگری باشه
+    const items = Array.isArray(equipments)
+      ? equipments
+      : Array.isArray(equipments?.data)
+        ? equipments.data
+        : [];
+
+    return items.map((item) => ({
+      id:
+        item._id?.toString() ||
+        item.equipmentCode ||
+        Math.random().toString(36).slice(2, 9),
+      name: item.name || "—",
+      brand: item.brand || "—",
+      health:
+        typeof item.healthIndex === "number"
+          ? item.healthIndex
+          : Number(item.healthIndex) || 0,
+      lastService: item.lastServiceDate || item.lastService || "—",
+      // فارسی‌سازی وضعیت برای نمایش در جدول
+      status:
+        item.operationalStatus === "Operational"
+          ? "عملیاتی"
+          : item.operationalStatus === "NeedsRepair"
+            ? "نیاز به تعمیر"
+            : item.operationalStatus === "OutOfService"
+              ? "خارج از رده"
+              : item.status && item.status === "عملیاتی"
+                ? "عملیاتی"
+                : "نامشخص",
+    }));
+  }, [equipments]);
   return (
     <DashboardLayout>
       <div
@@ -84,9 +98,13 @@ export default function EquipmentPage() {
             </p>
           </div>
 
-          <button className="w-full md:w-auto bg-white hover:bg-yellow-400 text-black font-black px-8 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95">
-            <Plus size={20} /> افزودن دستگاه جدید
-          </button>
+          <Link
+            href="/manager-dashboard/equipment/create"
+            className="w-full md:w-auto bg-white hover:bg-yellow-400 text-black font-black px-8 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95"
+          >
+            <Plus size={20} />
+            افزودن دستگاه جدید
+          </Link>
         </div>
 
         {/* Top Analytics - تحلیل سلامت کل */}
@@ -171,6 +189,25 @@ export default function EquipmentPage() {
             </div>
           </div>
         </div>
+        {/* اگر در حال لود است */}
+        {isLoading && (
+          <div className="text-white p-6 text-center">
+            در حال بارگذاری داده‌ها...
+          </div>
+        )}
+
+        {/* اگر خطا وجود دارد */}
+        {isError && (
+          <div className="text-red-400 p-6 text-center">
+            خطا در دریافت داده‌ها — دوباره تلاش کنید یا صفحه را رفرش کنید.
+            <button
+              onClick={() => refetch()}
+              className="mr-2 text-sm bg-yellow-400 text-black px-3 py-1 rounded-xl"
+            >
+              تلاش مجدد
+            </button>
+          </div>
+        )}
 
         {/* Inventory Table - لیست موجودی انبار آهن */}
         <div className="bg-[#1a1d23] rounded-[2.5rem] border border-gray-800 overflow-hidden shadow-2xl">
@@ -198,6 +235,7 @@ export default function EquipmentPage() {
                   <th className="p-6">شاخص سلامت</th>
                   <th className="p-6">آخرین سرویس فنی</th>
                   <th className="p-6 text-center">وضعیت عملیاتی</th>
+                  <th className="p-6 text-center">عملیات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800 font-bold">
@@ -230,8 +268,8 @@ export default function EquipmentPage() {
                               item.health > 80
                                 ? "bg-green-500"
                                 : item.health > 40
-                                ? "bg-yellow-400"
-                                : "bg-red-500"
+                                  ? "bg-yellow-400"
+                                  : "bg-red-500"
                             }`}
                             style={{ width: `${item.health}%` }}
                           ></div>
@@ -250,12 +288,28 @@ export default function EquipmentPage() {
                           item.status === "عملیاتی"
                             ? "bg-green-500/10 text-green-500 border-green-500/20"
                             : item.status === "نیاز به تعمیر"
-                            ? "bg-yellow-400/10 text-yellow-400 border-yellow-400/20"
-                            : "bg-red-500/10 text-red-500 border-red-500/20"
+                              ? "bg-yellow-400/10 text-yellow-400 border-yellow-400/20"
+                              : "bg-red-500/10 text-red-500 border-red-500/20"
                         }`}
                       >
                         {item.status}
                       </span>
+                    </td>
+                    <td className="p-6 text-center">
+                      <div className="flex justify-center gap-2">
+                        <Link
+                          href={`/manager-dashboard/equipment/${item.id}/edit`}
+                          className="p-2 bg-gray-800 text-gray-400 hover:text-yellow-400 hover:bg-gray-700 rounded-lg transition-all"
+                        >
+                          <Edit3 size={16} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="p-2 bg-gray-800 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

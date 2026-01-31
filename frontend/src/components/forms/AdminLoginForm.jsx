@@ -4,9 +4,20 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
+
 import ReCAPTCHA from "react-google-recaptcha";
-import { Shield, Dumbbell, Coffee, User, Eye, EyeOff } from "lucide-react";
+import {
+  Shield,
+  Dumbbell,
+  Coffee,
+  User,
+  Eye,
+  EyeOff,
+  User2,
+  Book,
+} from "lucide-react";
 
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useLoginUserMutation } from "@/redux/features/auth/authApi";
@@ -18,28 +29,30 @@ const ROLES = [
     label: "اعضا",
     icon: <User size={16} />,
     accent: "yellow",
-    redirect: "/users-dashboard",
   },
   {
-    key: "coach",
+    key: "trainer", // 👈 اصلاح شد
     label: "مربی",
     icon: <Dumbbell size={16} />,
     accent: "green",
-    redirect: "/trainers-dashboard",
   },
   {
     key: "admin",
     label: "مدیر باشگاه",
     icon: <Shield size={16} />,
     accent: "blue",
-    redirect: "/manager-dashboard",
   },
   {
     key: "cafe",
-    label: "مدیر کافه",
+    label: "متصدی کافه",
     icon: <Coffee size={16} />,
     accent: "orange",
-    redirect: "/manager-dashboard/cafe",
+  },
+  {
+    key: "reception",
+    label: "متصدی پذیرش باشگاه",
+    icon: <Book size={16} />,
+    accent: "cyan",
   },
 ];
 
@@ -68,6 +81,29 @@ const ACCENT_CLASSES = {
     text: "text-black",
     shadow: "shadow-orange-500/30",
   },
+  cyan: {
+    bg: "bg-cyan-500",
+    hover: "hover:bg-cyan-600",
+    text: "text-black",
+    shadow: "shadow-cyan-500/30",
+  },
+};
+// نقش‌های API به کلیدهای فرانت
+const ROLE_MAP = {
+  Member: "user",
+  Trainer: "trainer",
+  Admin: "admin",
+  Reception: "reception", // اگر لازم شد
+  CafeManager: "cafe",
+};
+
+// مسیر ریدایرکت بر اساس کلید فرانت
+const roleRedirectMap = {
+  user: "/users-dashboard",
+  trainer: "/trainers-dashboard",
+  admin: "/manager-dashboard",
+  cafe: "/cafe-dashboard",
+  reception: "/reception-dashboard",
 };
 
 export default function UnifiedLoginForm() {
@@ -103,26 +139,24 @@ export default function UnifiedLoginForm() {
     }
 
     try {
-      // 1️⃣ لاگین کاربر
       const response = await loginUser({
         employeeCode: data.employeeCode,
         password: data.password,
         role: activeRole.key,
       }).unwrap();
 
-      // فرض می‌کنیم response.user شامل اطلاعات کاربر است
       const user = response.user;
-
       if (!user) {
         notifyError("اطلاعات کاربر دریافت نشد");
         return;
       }
 
-      // 2️⃣ ذخیره امن در sessionStorage (با JSON.stringify)
+      const normalizedRole = activeRole.key;
+
       const safeUser = {
         _id: user._id,
         name: user.name,
-        role: user.role,
+        role: normalizedRole,
         profileImage: user.profileImage,
         email: user.email,
         employeeCode: user.employeeCode,
@@ -130,17 +164,18 @@ export default function UnifiedLoginForm() {
 
       sessionStorage.setItem("currentUser", JSON.stringify(safeUser));
 
-      // 3️⃣ لاگ برای دیباگ
-      console.log("✅ Current User Stored:", safeUser);
+      const redirectPath = roleRedirectMap[normalizedRole];
+      if (!redirectPath) {
+        notifyError("مسیر ریدایرکت برای این نقش تعریف نشده");
+        return;
+      }
 
-      // 4️⃣ نمایش پیام موفقیت
+      router.replace(redirectPath);
+
       notifySuccess(`ورود موفق | ${activeRole.label}`);
-
-      // 5️⃣ ریدایرکت بعد از ذخیره کاربر
-      router.replace(activeRole.redirect);
     } catch (err) {
       notifyError(err?.data?.message || "ورود ناموفق");
-      console.error("Login error:", err);
+      console.error(err);
     }
   };
 
@@ -189,6 +224,11 @@ export default function UnifiedLoginForm() {
             <input
               {...register("employeeCode")}
               placeholder="شناسه ورود"
+              onChange={(e) => {
+                const value = e.target.value;
+                // حذف تمام کاراکترهای فارسی و عربی
+                e.target.value = value.replace(/[\u0600-\u06FF]/g, "");
+              }}
               className="w-full bg-[#0f1115] border border-gray-800 rounded-xl py-4 px-4 text-white font-bold focus:outline-none focus:border-yellow-400"
             />
             <ErrorMsg msg={errors.employeeCode?.message} />
@@ -199,6 +239,11 @@ export default function UnifiedLoginForm() {
               {...register("password")}
               type={showPass ? "text" : "password"}
               placeholder="رمز عبور"
+              onChange={(e) => {
+                const value = e.target.value;
+                // حذف تمام کاراکترهای فارسی و عربی
+                e.target.value = value.replace(/[\u0600-\u06FF]/g, "");
+              }}
               className="w-full bg-[#0f1115] border border-gray-800 rounded-xl py-4 px-4 text-white font-bold focus:outline-none focus:border-yellow-400"
             />
             <button

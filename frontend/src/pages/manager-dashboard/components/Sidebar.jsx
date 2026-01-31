@@ -53,11 +53,6 @@ const menuItems = [
     icon: <CreditCard size={20} />,
     href: "/manager-dashboard/finance",
   },
-  {
-    label: "تنظیمات سیستمی",
-    icon: <Settings size={20} />,
-    href: "/manager-dashboard/settings",
-  },
 ];
 
 function MenuItem({ item, pathname, onClose, level = 0 }) {
@@ -66,7 +61,7 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
   useEffect(() => {
     if (item.subMenu && pathname) {
       const matchSub = item.subMenu.some(
-        (sub) => pathname === sub.href || pathname.startsWith(sub.href)
+        (sub) => pathname === sub.href || pathname.startsWith(sub.href),
       );
       if (matchSub) setOpen(true);
     }

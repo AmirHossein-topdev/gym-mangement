@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import DashboardLayout from "./layout";
+import Link from "next/link";
 
 export default function UserMainDashboard() {
   // داده‌های واقعی بر اساس صفحات قبلی که با هم ساختیم
@@ -218,7 +219,10 @@ export default function UserMainDashboard() {
               تجهیز سریع
             </h2>
             <div className="grid grid-cols-1 gap-3">
-              <button className="flex items-center justify-between p-5 bg-yellow-400 hover:bg-white rounded-2xl transition-all group">
+              <Link
+                href={"users-dashboard/aerobic"}
+                className="flex items-center justify-between p-5 bg-yellow-400 hover:bg-white rounded-2xl transition-all group"
+              >
                 <span className="text-black font-black italic text-sm">
                   رزرو دستگاه هوازی
                 </span>
@@ -226,8 +230,11 @@ export default function UserMainDashboard() {
                   className="text-black group-hover:translate-x-[-5px] transition-transform"
                   size={20}
                 />
-              </button>
-              <button className="flex items-center justify-between p-5 bg-[#1a1d23] border border-gray-800 hover:border-yellow-400 rounded-2xl transition-all group">
+              </Link>
+              <Link
+                href={"users-dashboard/cafe"}
+                className="flex items-center justify-between p-5 bg-[#1a1d23] border border-gray-800 hover:border-yellow-400 rounded-2xl transition-all group"
+              >
                 <span className="text-white font-black italic text-sm">
                   سفارش از منوی کافه
                 </span>
@@ -235,8 +242,11 @@ export default function UserMainDashboard() {
                   className="text-gray-500 group-hover:translate-x-[-5px] transition-transform"
                   size={20}
                 />
-              </button>
-              <button className="flex items-center justify-between p-5 bg-[#1a1d23] border border-gray-800 hover:border-yellow-400 rounded-2xl transition-all group">
+              </Link>
+              <Link
+                href={"users-dashboard/finance"}
+                className="flex items-center justify-between p-5 bg-[#1a1d23] border border-gray-800 hover:border-yellow-400 rounded-2xl transition-all group"
+              >
                 <span className="text-white font-black italic text-sm">
                   تمدید اعتبار شهریه
                 </span>
@@ -244,7 +254,7 @@ export default function UserMainDashboard() {
                   className="text-gray-500 group-hover:translate-x-[-5px] transition-transform"
                   size={20}
                 />
-              </button>
+              </Link>
             </div>
 
             <div className="mt-6 p-6 bg-gradient-to-br from-[#1a1d23] to-[#0f1115] border border-gray-800 rounded-[2rem]">

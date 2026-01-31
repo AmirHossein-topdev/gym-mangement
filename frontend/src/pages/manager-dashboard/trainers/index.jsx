@@ -115,14 +115,14 @@ export default function UsersPage() {
         (u) =>
           u.role === "Trainer" ||
           u.role === "Reception" ||
-          u.role === "CafeManager"
+          u.role === "CafeManager",
       )
     : [];
 
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase())
+      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (isLoading)
@@ -158,7 +158,7 @@ export default function UsersPage() {
           </div>
 
           <Link
-            href="/reception-dashboard/users/create"
+            href="/manager-dashboard/users/create"
             className="w-full md:w-auto flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-2xl text-sm font-black transition-all shadow-[0_10px_20px_rgba(250,204,21,0.2)] active:scale-95"
           >
             <UserPlus size={18} /> افزودن جدید
@@ -262,7 +262,7 @@ export default function UsersPage() {
                     <td className="py-4 px-6">
                       <div className="flex justify-center gap-2">
                         <Link
-                          href={`/reception-dashboard/users/${user._id}/edit`}
+                          href={`/manager-dashboard/users/${user._id}/edit`}
                           className="p-2 bg-gray-800 text-gray-400 hover:text-yellow-400 hover:bg-gray-700 rounded-lg transition-all"
                         >
                           <Edit3 size={16} />

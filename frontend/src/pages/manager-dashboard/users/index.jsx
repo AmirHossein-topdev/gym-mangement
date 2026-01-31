@@ -89,7 +89,7 @@ const UserCard = ({ user, index, handleDelete }) => {
 
       <div className="flex justify-end gap-2 mt-5">
         <Link
-          href={`/dashboard/users/${user._id}/edit`}
+          href={`/manager-dashboard/users/${user._id}/edit`}
           className="flex-1 flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-lg text-xs transition-all font-bold"
         >
           <Edit3 size={14} /> ویرایش
@@ -151,7 +151,7 @@ export default function UsersPage() {
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase())
+      user.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (isLoading)

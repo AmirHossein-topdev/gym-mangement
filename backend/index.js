@@ -4,7 +4,6 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
-
 // --- Database ---
 const connectDB = require("./config/db"); // مسیر فایل کانکت DB (CJS)
 
@@ -14,6 +13,7 @@ const authRoutes = require("./routes/auth.routes");
 const uploadRoutes = require("./routes/uploadDocument.routes");
 const cafeMenuRoutes = require("./routes/CafeMenu.routes");
 const trainingRequestRoutes = require("./routes/trainingRequest.routes");
+const equipmentRoutes = require("./routes/equipment.routes");
 
 // --- Middleware ---
 const globalErrorHandler = require("./middleware/global-error-handler");
@@ -31,7 +31,7 @@ app.use(
   cors({
     origin: "http://localhost:3000", // آدرس فرانت‌اند
     credentials: true, // مهم برای ارسال کوکی‌ها
-  })
+  }),
 );
 
 // Body parsers (important: parse body BEFORE requestLogger if you want to log body)
@@ -51,8 +51,6 @@ app.use(requestLogger);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use("/api/menu", cafeMenuRoutes);
-
 // --- Connect to Database ---
 connectDB()
   .then(() => console.log("MongoDB connected successfully"))
@@ -67,6 +65,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/training-requests", trainingRequestRoutes);
+app.use("/api/equipment", equipmentRoutes);
+
+// و برای پوشه‌ی آپلودها
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // --- Root Route ---
 app.get("/", (req, res) => res.send("Server is running successfully"));
 

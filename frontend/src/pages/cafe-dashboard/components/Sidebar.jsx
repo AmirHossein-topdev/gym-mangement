@@ -17,36 +17,14 @@ import {
 
 const menuItems = [
   {
-    label: "داشبورد",
-    icon: <LayoutDashboard size={20} />,
-    href: "/users-dashboard",
+    label: "بوفه و رستوران",
+    icon: <Coffee size={20} />,
+    href: "/cafe-dashboard",
   },
   {
     label: "پروفایل من",
     icon: <Info size={20} />,
-    href: "/users-dashboard/profile",
-  },
-  {
-    label: "امور مالی",
-    icon: <CreditCard size={20} />,
-    href: "/users-dashboard/finance",
-  },
-  {
-    label: "حضور و غیاب",
-    icon: <CalendarDays size={20} />,
-    href: "/users-dashboard/presence",
-  },
-
-  {
-    label: "هوازی",
-    icon: <Dumbbell size={20} />,
-    href: "/users-dashboard/aerobic",
-  },
-
-  {
-    label: "بوفه و رستوران",
-    icon: <Coffee size={20} />,
-    href: "/users-dashboard/cafe",
+    href: "/cafe-dashboard/profile",
   },
 ];
 
@@ -56,15 +34,15 @@ function MenuItem({ item, pathname, onClose, level = 0 }) {
   useEffect(() => {
     if (item.subMenu && pathname) {
       const matchSub = item.subMenu.some(
-        (sub) => pathname === sub.href || pathname.startsWith(sub.href)
+        (sub) => pathname === sub.href || pathname.startsWith(sub.href),
       );
       if (matchSub) setOpen(true);
     }
   }, [pathname, item.subMenu]);
 
   const isActive = pathname
-    ? item.href === "/users-dashboard"
-      ? pathname === "/users-dashboard"
+    ? item.href === "/cafe-dashboard"
+      ? pathname === "/cafe-dashboard"
       : pathname.startsWith(item.href)
     : false;
 
